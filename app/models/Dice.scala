@@ -1,20 +1,29 @@
 package models
 
-import models.OutComes.{Advantage, Blank, Success}
+import models.Symbols.{Advantage, Success}
 
 import scala.util.Random
 
 sealed trait Die {
 
-  val sides: List[OutCome]
+  val sides: List[DiceFace]
+  //require(sides.nonEmpty)
 
-  def roll: OutCome = sides.apply(Random.nextInt(sides.size))
+  def roll: DiceFace = sides.apply(Random.nextInt(sides.size))
 }
 
 object Dice {
 
+  //live else where?
+  private val blank = DiceFace()
+  private val singleSuccess = DiceFace(Success)
+  private val singleAdvantage = DiceFace(Advantage)
+  private val doubleAdvantage = DiceFace(Advantage, Advantage)
+  private val successAdvantage = DiceFace(Success, Advantage)
+
+
   case object BlueBoost extends Die {
-    override val sides = List(Advantage, Advantage, Blank, Success, Success)
+    override val sides = List(blank, blank, singleSuccess, singleAdvantage, doubleAdvantage, successAdvantage)
   }
 
   case object GreenAbility extends Die {
