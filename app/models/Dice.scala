@@ -7,7 +7,7 @@ sealed trait Die {
 
   protected val sides: List[DiceFace]
 
-  def roll: DiceFace = sides.apply(Random.nextInt(sides.size))
+  def roll: (Die, DiceFace) = (this, sides.apply(Random.nextInt(sides.size)))
 }
 
 object Dice {
