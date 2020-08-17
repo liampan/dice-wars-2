@@ -12,4 +12,4 @@ libraryDependencies ++= Seq(
   ws
 )
 
-libraryDependencies <+= scalaVersion("org.scala-lang" % "scala-compiler" % _ )
+libraryDependencies += scalaVersion("org.scala-lang" % "scala-compiler" % _ ).value
