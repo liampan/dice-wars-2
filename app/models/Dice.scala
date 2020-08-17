@@ -12,30 +12,28 @@ sealed trait Die {
 
 object Dice {
 
-  //TODO ADD ALL THE DICES' SIDES
   case object BlueBoost extends Die {
     override protected val sides = List(blank, blank, singleSuccess, singleAdvantage, doubleAdvantage, successAdvantage)
   }
 
   case object GreenAbility extends Die {
-    override protected val sides = List(blank)
+    override protected val sides = List(blank, doubleAdvantage, singleSuccess, singleAdvantage, doubleSuccess, successAdvantage, singleAdvantage, singleSuccess)
   }
 
   case object YellowProficiency extends Die {
-    override protected val sides = List(blank)
+    override protected val sides = List(blank, doubleSuccess, doubleSuccess, successAdvantage, successAdvantage, successAdvantage, singleSuccess, singleSuccess, doubleAdvantage, doubleAdvantage, singleAdvantage, triumph)
   }
 
   case object BlackSetback extends Die {
-    override protected val sides = List(blank)
+    override protected val sides = List(blank, blank, singleThreat, singleThreat, singleFailure, singleFailure)
   }
 
   case object RedChallenge extends Die {
-    override protected val sides = List(blank)
+    override protected val sides = List(blank, doubleFailure, doubleFailure, failureThreat, failureThreat, doubleThreat, doubleThreat, singleFailure, singleFailure, singleThreat, singleThreat, despair)
   }
 
   case object PurpleDifficulty extends Die {
-    override protected val sides = List(blank)
+    override protected val sides = List(blank, singleThreat, singleThreat, singleThreat, doubleThreat, singleFailure, doubleFailure, failureThreat)
   }
 
 }
-

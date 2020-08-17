@@ -1,6 +1,6 @@
 package models
 
-import models.Symbols.{Advantage, Success}
+import models.Symbols._
 
 sealed case class DiceFace(a: Option[Symbol], b: Option[Symbol]) {
   def symbols: List[Symbol] = a.toList ++ b.toList
@@ -13,11 +13,19 @@ private object DiceFace {
 }
 
 object DiceFaces {
+  val blank: DiceFace = DiceFace()
 
-  //TODO add all the needed ones of these:
-  val blank = DiceFace()
-  val singleSuccess = DiceFace(Success)
-  val singleAdvantage = DiceFace(Advantage)
-  val doubleAdvantage = DiceFace(Advantage, Advantage)
-  val successAdvantage = DiceFace(Success, Advantage)
+  val singleSuccess: DiceFace = DiceFace(Success)
+  val doubleSuccess: DiceFace = DiceFace(Success, Success)
+  val singleAdvantage: DiceFace = DiceFace(Advantage)
+  val doubleAdvantage: DiceFace = DiceFace(Advantage, Advantage)
+  val successAdvantage: DiceFace = DiceFace(Success, Advantage)
+  val triumph: DiceFace = DiceFace(Triumph)
+
+  val singleThreat: DiceFace = DiceFace(Threat)
+  val doubleThreat: DiceFace = DiceFace(Threat, Threat)
+  val singleFailure: DiceFace = DiceFace(Failure)
+  val doubleFailure: DiceFace = DiceFace(Failure, Failure)
+  val failureThreat: DiceFace = DiceFace(Failure, Threat)
+  val despair: DiceFace = DiceFace(Despair)
 }
