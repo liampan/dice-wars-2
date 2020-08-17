@@ -1,51 +1,40 @@
 package models
 
-import models.Symbols.{Advantage, Success}
-
+import models.DiceFaces._
 import scala.util.Random
 
 sealed trait Die {
 
-  val sides: List[DiceFace]
-  //require(sides.nonEmpty)
+  protected val sides: List[DiceFace]
 
   def roll: DiceFace = sides.apply(Random.nextInt(sides.size))
 }
 
 object Dice {
 
-  //live else where?
-  private val blank = DiceFace()
-  private val singleSuccess = DiceFace(Success)
-  private val singleAdvantage = DiceFace(Advantage)
-  private val doubleAdvantage = DiceFace(Advantage, Advantage)
-  private val successAdvantage = DiceFace(Success, Advantage)
-
-
+  //TODO ADD ALL THE DICES' SIDES
   case object BlueBoost extends Die {
-    override val sides = List(blank, blank, singleSuccess, singleAdvantage, doubleAdvantage, successAdvantage)
+    override protected val sides = List(blank, blank, singleSuccess, singleAdvantage, doubleAdvantage, successAdvantage)
   }
 
   case object GreenAbility extends Die {
-    override val sides = List()
+    override protected val sides = List(blank)
   }
 
   case object YellowProficiency extends Die {
-    override val sides = List()
+    override protected val sides = List(blank)
   }
 
-
   case object BlackSetback extends Die {
-    override val sides = List()
+    override protected val sides = List(blank)
   }
 
   case object RedChallenge extends Die {
-    override val sides = List()
+    override protected val sides = List(blank)
   }
 
-
   case object PurpleDifficulty extends Die {
-    override val sides = List()
+    override protected val sides = List(blank)
   }
 
 }

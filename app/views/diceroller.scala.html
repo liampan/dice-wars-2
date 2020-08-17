@@ -1,0 +1,37 @@
+@import models.Symbol
+
+@this()
+
+@(rolls: List[(Die, DiceFace)], result: List[Symbol])
+
+@main("D&D") {
+<a href="/dice">
+<button> ROLL </button>
+</a>
+<h2>DICE ROLLS: </h2>
+
+<table>
+    @rolls.map{ case (die, diceFace) =>
+    <tr>
+
+        <th>@die.toString</th>
+
+    </tr>
+    <tr>
+        <td>@diceFace</td>
+
+    </tr>
+}
+</table>
+
+<h2> OUTCOME : </h2>
+
+<table>
+    <tr>
+        @result.map{ s =>
+        <th>@s</th>
+        }
+    </tr>
+</table>
+
+}
