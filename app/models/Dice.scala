@@ -11,6 +11,7 @@ sealed trait Die {
 }
 
 object Dice {
+  type RolledDice = List[(Die, DiceFace)]
 
   case object BlueBoost extends Die {
     override protected val sides = List(blank, blank, singleSuccess, singleAdvantage, doubleAdvantage, successAdvantage)
