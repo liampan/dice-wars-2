@@ -7,6 +7,8 @@ import play.api.mvc._
 import services.DiceCancellingService
 import views.html.diceroller
 
+import scala.collection.SortedMap
+
 class DiceRollerController @Inject()(
                                       view: diceroller,
                                       cc: ControllerComponents,
@@ -21,7 +23,7 @@ class DiceRollerController @Inject()(
   }
 }
 
-case class ViewModel(rolledDice: RolledDice, outcome: List[Symbol]){
+case class ViewModel(rolledDice: RolledDice, private val outcome: List[Symbol]){
   private val outcomeScreenSize: Double = 64.0
   def outcomeScreenSize(die: Die, diceFace: DiceFace): Double =
     if(diceFace.symbols.size >= 2) (1.0/2.0) * outcomeScreenSize
@@ -32,4 +34,8 @@ case class ViewModel(rolledDice: RolledDice, outcome: List[Symbol]){
 
   def getDiceClass(die: Die, diceFace: DiceFace): String =
     die.name + diceFace.symbols.size
+
+  def getSortedOutcome: SortedMap[Symbol, Int] =
+    SortedMap(outcome.sorted.groupBy(identity).mapValues(_.size).toSeq: _*)
+
 }

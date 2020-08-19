@@ -16,7 +16,7 @@
             <td>
                 <div class="@rolls.getDiceClass(die,diceFace) diebox">
                     @diceFace.symbols.map { symbol =>
-                        <img width=@rolls.outcomeScreenSize(die,diceFace) height=@rolls.outcomeScreenSize(die,diceFace) src=@rolls.imgSource(symbol) alt="Some alt text"/>
+                        <img width=@rolls.outcomeScreenSize(die,diceFace) height=@rolls.outcomeScreenSize(die,diceFace) src=@rolls.imgSource(symbol) alt="@die.toString Roll"/>
                     }
                 </div>
             </td>
@@ -30,8 +30,15 @@
 
 <table>
     <tr>
-        @rolls.outcome.map{ s =>
-        <th>@s</th>
+        @rolls.getSortedOutcome.map{ case(symbol,amount) =>
+            @for(_ <- 1 to amount) {
+                <td>
+                    <div class="diebox @symbol.toLowerCase" title="@amount @symbol.toString">
+                        <img src=@rolls.imgSource(symbol) alt="@symbol.toString"/>
+                    </div>
+                </td>
+            }
+            <td class="space"></td>
         }
     </tr>
 </table>
