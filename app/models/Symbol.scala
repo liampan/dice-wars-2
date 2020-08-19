@@ -38,4 +38,5 @@ object Symbol {
 sealed trait Symbol {
   def opposite: Option[Symbol]
   protected val order: Int
+  def toLowerCase: String = this.toString.toLowerCase
 }

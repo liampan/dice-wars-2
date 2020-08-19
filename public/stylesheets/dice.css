@@ -1,0 +1,18 @@
+.diebox { width: 64px; height: 64px; display: table-cell; background-size : 96px 96px; margin: 2px }
+
+.proficiency { background-image:url("/assets/images/dice/proficiencybg.png"); padding : 20px 16px 12px 18px }
+.ability { background-image:url("/assets/images/dice/abilitybg.png"); padding : 24px 16px 8px 16px }
+.boost1 { background-image:url("/assets/images/dice/boostbg.png"); padding : 16px }
+.boost2 { background-image:url("/assets/images/dice/boostbg.png"); padding : 16px 32px 16px 32px }
+.boost0 { background-image:url("/assets/images/dice/boostbg.png"); padding : 48px }
+.challenge1 { background-image:url("/assets/images/dice/challengebg.png"); padding : 20px }
+.challenge2 { background-image:url("/assets/images/dice/challengebg.png"); padding : 12px 32px 20px 32px }
+.challenge0 { background-image:url("/assets/images/dice/challengebg.png"); padding : 48px }
+.setback { background-image:url("/assets/images/dice/setbackbg.png"); padding : 16px }
+.difficulty { background-image:url("/assets/images/dice/difficultybg.png"); padding : 12px 16px 20px 16px }
+.success { }
+.failure { background : black; }
+.advantage { }
+.threat { background : black; }
+.despair { background : #E31837; }
+.triumph { background : #FFE800; }

@@ -1,8 +1,8 @@
-@import models.Symbol
+@import controllers.ViewModel
 
 @this(main: main)
 
-@(rolls: List[(Die, DiceFace)], result: List[Symbol])
+@(rolls: ViewModel)
 
 @main("D&D") {
 <a href="/dice">
@@ -11,24 +11,26 @@
 <h2>DICE ROLLS: </h2>
 
 <table>
-    @rolls.map{ case (die, diceFace) =>
     <tr>
+        @rolls.rolledDice.map { case (die, diceFace) =>
+            <td>
+                <div class="@rolls.getDiceClass(die,diceFace) diebox">
+                    @diceFace.symbols.map { symbol =>
+                        <img width=@rolls.outcomeScreenSize(die,diceFace) height=@rolls.outcomeScreenSize(die,diceFace) src=@rolls.imgSource(symbol) alt="Some alt text"/>
+                    }
+                </div>
+            </td>
 
-        <th>@die.toString</th>
-
+        }
     </tr>
-    <tr>
-        <td>@diceFace</td>
 
-    </tr>
-}
 </table>
 
 <h2> OUTCOME : </h2>
 
 <table>
     <tr>
-        @result.map{ s =>
+        @rolls.outcome.map{ s =>
         <th>@s</th>
         }
     </tr>
