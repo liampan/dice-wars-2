@@ -7,10 +7,11 @@ sealed trait Die {
 
   protected val sides: List[DiceFace]
 
-  def roll: DiceFace = sides.apply(Random.nextInt(sides.size))
+  def roll: (Die, DiceFace) = (this, sides.apply(Random.nextInt(sides.size)))
 }
 
 object Dice {
+  type RolledDice = List[(Die, DiceFace)]
 
   case object BlueBoost extends Die {
     override protected val sides = List(blank, blank, singleSuccess, singleAdvantage, doubleAdvantage, successAdvantage)

@@ -13,3 +13,6 @@ libraryDependencies ++= Seq(
 )
 
 libraryDependencies += scalaVersion("org.scala-lang" % "scala-compiler" % _ ).value
+libraryDependencies ++= Seq(
+  "org.scalatestplus.play" %% "scalatestplus-play" % "5.1.0" % "test"
+)
