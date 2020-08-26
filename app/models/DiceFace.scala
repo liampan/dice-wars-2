@@ -4,7 +4,6 @@ import models.Symbol._
 
 sealed case class DiceFace(a: Option[Symbol], b: Option[Symbol]) {
   def symbols: List[Symbol] = a.toList ++ b.toList
-    //TODO NAME
 }
 
 private object DiceFace {
