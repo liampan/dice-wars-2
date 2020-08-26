@@ -1,0 +1,26 @@
+.diebox { width: 64px; height: 64px; display: table-cell; background-size : 96px 96px; margin: 2px }
+.space { width: 24px }
+
+.proficiency1 { background-image:url("/assets/images/dice/proficiencybg.png"); padding : 20px 16px 12px 16px }
+.proficiency2 { background-image:url("/assets/images/dice/proficiencybg.png"); padding : 20px 32px 12px 32px }
+.proficiency0 { background-image:url("/assets/images/dice/proficiencybg.png"); padding : 48px }
+.ability1 { background-image:url("/assets/images/dice/abilitybg.png"); padding : 36px 26px 16px 26px }
+.ability2 { background-image:url("/assets/images/dice/abilitybg.png"); padding : 24px 32px 8px 32px }
+.ability0 { background-image:url("/assets/images/dice/abilitybg.png"); padding : 48px }
+.boost1 { background-image:url("/assets/images/dice/boostbg.png"); padding : 16px }
+.boost2 { background-image:url("/assets/images/dice/boostbg.png"); padding : 16px 32px 16px 32px }
+.boost0 { background-image:url("/assets/images/dice/boostbg.png"); padding : 48px }
+.challenge1 { background-image:url("/assets/images/dice/challengebg.png"); padding : 15px 19.5px 24px 19.5px }
+.challenge2 { background-image:url("/assets/images/dice/challengebg.png"); padding : 12px 32px 20px 32px }
+.challenge0 { background-image:url("/assets/images/dice/challengebg.png"); padding : 48px }
+.setback1 { background-image:url("/assets/images/dice/setbackbg.png"); padding : 16px }
+.setback0 { background-image:url("/assets/images/dice/setbackbg.png"); padding : 48px }
+.difficulty1 { background-image:url("/assets/images/dice/difficultybg.png"); padding : 20px 26px 32px 26px }
+.difficulty2 { background-image:url("/assets/images/dice/difficultybg.png"); padding : 12px 32px 20px 32px }
+.difficulty0 { background-image:url("/assets/images/dice/difficultybg.png"); padding : 48px }
+.success { }
+.failure { background : black; }
+.advantage { }
+.threat { background : black; }
+.despair { background : #E31837; }
+.triumph { background : #FFE800; }
