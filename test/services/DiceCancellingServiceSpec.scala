@@ -7,6 +7,24 @@ class DiceCancellingServiceSpec extends PlaySpec {
 
   val SUT = new DiceCancellingService
 
+
+  "findMost" must {
+    "work with none" in {
+      SUT.findMost(Nil) mustBe Nil
+    }
+    "work with one" in {
+      SUT.findMost(List(Success)) mustBe List(Success)
+    }
+
+    "work with one of each" in {
+      SUT.findMost(List(Success, Failure)) mustBe Nil
+    }
+
+    "work with Many" in {
+      SUT.findMost(List(Success, Failure, Success)) mustBe List(Success)
+    }
+  }
+
   "Cancel" must {
     "remove none" when {
       "no dice to cancel" in {
@@ -34,7 +52,7 @@ class DiceCancellingServiceSpec extends PlaySpec {
     }
 
     "not cancel triumph with despair" in {
-      SUT.cancelDice(List(Triumph, Despair)) mustBe List(Despair, Triumph)
+      SUT.cancelDice(List(Triumph, Despair)) mustBe List(Triumph, Despair)
     }
   }
 
