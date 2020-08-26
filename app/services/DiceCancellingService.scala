@@ -1,19 +1,19 @@
 package services
 
 import models.Symbol
-import Symbol._
 
 class DiceCancellingService {
 
   def cancelDice(rolledSymbols: List[Symbol]): List[Symbol] = {
-    def get(wanted: Symbol*): List[Symbol] = rolledSymbols.filter(wanted.contains)
+    def get(wanted: Seq[Symbol]): List[Symbol] = rolledSymbols.filter(wanted.contains)
 
-    List(
-      get(Advantage, Threat),
-      get(Success, Failure),
-      get(Triumph),
-      get(Despair)
-    ).flatMap(findMost)
+    rolledSymbols
+      .distinct
+        .map(cur => (cur, get(cur.opposite.toSeq :+ cur)))
+        .foldLeft[List[(Symbol, List[Symbol])]](Nil) { (acc, cur) =>
+          if (cur._1.opposite.exists(c => acc.map(_._1).contains(c))) acc
+          else acc :+ cur
+        }.flatMap(t => findMost(t._2))
   }
 
   def findMost(symbols: List[Symbol]): List[Symbol] =
