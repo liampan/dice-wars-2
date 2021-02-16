@@ -1,4 +1,4 @@
-# scala/starwars
+# scala
 
 A Scala app (using the Play framework), which can easily be deployed to Heroku.
 

@@ -1,4 +1,4 @@
-name := """starwars"""
+name := """multiplayer-framework"""
 
 version := "1.0-SNAPSHOT"
 
