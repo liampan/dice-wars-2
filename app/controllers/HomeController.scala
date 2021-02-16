@@ -1,5 +1,6 @@
 package controllers
 
+import actions.UserAction
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.google.inject.Inject
@@ -10,23 +11,25 @@ import views.html.index
 import scala.concurrent.Future
 
 class HomeController @Inject()(view: index,
-                               cc: ControllerComponents
+                               cc: ControllerComponents,
+                               userAction: UserAction
                               )(implicit system: ActorSystem, mat: Materializer) extends AbstractController(cc) {
+import repositories.RoomRepository._
 
-
-  def onPageLoad(): Action[AnyContent] = Action { request =>
-    Ok(view()).addingToSession(("user" -> "user1"))(request)
+  def enterRoom(name: String): Action[AnyContent] = userAction {
+    request =>
+      Ok(view()).addingToSession("username" -> request.userName, "roomname" -> name)(request)
   }
-
 
   def socket = WebSocket.acceptOrResult[String, String] { request =>
     Future.successful(
-      request.session.get("user") match {
-        case Some(user) =>
+      (request.session.get("username"), request.session.get("roomname")) match {
+        case (Some(user), Some(room)) =>
           Right(ActorFlow.actorRef { out =>
-            MyWebSocketActor.props(out, user)
+            addToRoom(room, out)
+            MyWebSocketActor.props(out, user, room)
           })
-        case None => Left(Forbidden)
+        case _ => Left(Forbidden)
       }
     )
   }

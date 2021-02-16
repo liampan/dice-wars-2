@@ -1,6 +1,3 @@
-package controllers
-
-import javax.inject.Inject
 import play.api.Logger
 import play.api.http.HttpErrorHandler
 import play.api.http.Status.NOT_FOUND
@@ -8,6 +5,7 @@ import play.api.mvc.Results._
 import play.api.mvc.{RequestHeader, Result}
 import views.html.errorpage
 
+import javax.inject.Inject
 import scala.concurrent.Future
 
 class HttpPageErrorHandler @Inject()(errorPage: errorpage) extends HttpErrorHandler {

@@ -1,14 +1,20 @@
 package controllers
 
 import akka.actor._
+import repositories.RoomRepository._
 
 object MyWebSocketActor {
-  def props(out: ActorRef, user: String) = Props(new MyWebSocketActor(out, user))
+  def props(out: ActorRef, user: String, room: String) = Props(new MyWebSocketActor(out, user, room))
 }
 
-class MyWebSocketActor(out: ActorRef, user: String) extends Actor {
-  def receive = {
-    case "hello" => out ! s"hello $user"
-    case msg: String => out ! ("I received your message: " + msg)
+class MyWebSocketActor(out: ActorRef, user: String, room: String) extends Actor {
+
+  override def receive = {
+    case msg => rooms(room).map(_ ! s"$user: $msg" )
+  }
+
+  override def postStop(): Unit = {
+    super.postStop()
+    leaveAllRooms(out)
   }
 }
