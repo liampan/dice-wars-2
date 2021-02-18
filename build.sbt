@@ -1,4 +1,4 @@
-name := """multiplayer-framework"""
+name := """dice-wars-2"""
 
 version := "1.0-SNAPSHOT"
 
