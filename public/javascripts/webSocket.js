@@ -4,7 +4,8 @@ var socket;
 
 function webSocket() {
     var host = window.location.host;
-    var protocol = (("http:" === document.location.protocol) ? "ws" : "wss");
+    console.log(window.location.protocol);
+    var protocol = (("http:" === window.location.protocol) ? "ws" : "wss");
     var url = protocol + "://" + host + "/ws"
     console.log(url);
     socket = new WebSocket(url);
