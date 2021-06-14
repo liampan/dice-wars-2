@@ -17,14 +17,18 @@ case class Room(participants: Set[ActorRef], messages: Seq[String] = Seq.empty) 
   def addMsg(msg: String) = this.copy(messages = messages :+ msg)
 }
 
+object Room {
+  def empty = Room(Set.empty)
+}
+
 object RoomRepository extends RoomRepository {
 
   //room id -> participants
   private var rooms: Map[String, Room] = Map.empty.withDefault(_ => Room(Set.empty))
 
   def getRoom(roomId: String): Room = {
-    println(rooms)
-    rooms(roomId)
+    cleanUp
+    rooms.getOrElse(roomId, Room.empty)
   }
 
   def updateRoom(roomId: String, room: Room) = rooms = rooms.updated(roomId, room)
@@ -36,10 +40,13 @@ object RoomRepository extends RoomRepository {
     room
   }
 
-  def addToRoom(room: String, af: ActorRef) =
-    rooms = rooms.updated(room, rooms.apply(room).addParticipant(af))
+  def addToRoom(roomId: String, af: ActorRef) =
+    rooms = rooms.updated(roomId, getRoom(roomId).addParticipant(af))
 
   def leaveAllRooms(af: ActorRef) =
     rooms = rooms.map{case (key, room) => key -> room.removeParticipant(af)}
+
+  def cleanUp =
+    rooms = rooms.filter{case (_, room) => room.participants.nonEmpty }
 
 }

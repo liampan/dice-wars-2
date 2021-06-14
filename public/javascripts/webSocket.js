@@ -27,7 +27,7 @@ function sendMessage(msg) {
 function onMessage(evt) {
     var received_msg = evt.data;
     document.getElementById('screen').innerHTML = received_msg;
-    console.log(received_msg)
+    document.querySelector('[autofocus]').focus()
 }
 
 function onClose(evt) {

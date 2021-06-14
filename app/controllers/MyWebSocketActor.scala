@@ -5,9 +5,9 @@ import repositories.RoomRepository._
 import views.html.messenger
 
 object MyWebSocketActor {
-  def props(out: ActorRef, user: String, room: String): Props = {
-    addToRoom(room, out)
-    Props(new MyWebSocketActor(out, user, room))
+  def props(out: ActorRef, user: String, roomId: String): Props = {
+    addToRoom(roomId, out)
+    Props(new MyWebSocketActor(out, user, roomId))
   }
 }
 
@@ -21,7 +21,8 @@ class MyWebSocketActor(out: ActorRef, user: String, roomId: String) extends Acto
 
   override def postStop(): Unit = {
     super.postStop()
-    getRoom(roomId).participants.foreach(_ ! s"$user has left")
+    val room = addMsg(roomId, s"$user has left")
+    room.participants.foreach(_ ! messenger(room.messages).toString)
     leaveAllRooms(out)
   }
 }
