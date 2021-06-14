@@ -14,11 +14,11 @@ class HomeController @Inject()(view: index,
                                cc: ControllerComponents,
                                userAction: UserAction
                               )(implicit system: ActorSystem, mat: Materializer) extends AbstractController(cc) {
-import repositories.RoomRepository._
 
-  def enterRoom(name: String): Action[AnyContent] = userAction {
+  def enterRoom(room: String): Action[AnyContent] = userAction {
     request =>
-      Ok(view()).addingToSession("username" -> request.userName, "roomname" -> name)(request)
+      Ok(view())
+        .addingToSession("username" -> request.userName, "roomname" -> room)(request)
   }
 
   def socket = WebSocket.acceptOrResult[String, String] { request =>
@@ -26,7 +26,6 @@ import repositories.RoomRepository._
       (request.session.get("username"), request.session.get("roomname")) match {
         case (Some(user), Some(room)) =>
           Right(ActorFlow.actorRef { out =>
-            addToRoom(room, out)
             MyWebSocketActor.props(out, user, room)
           })
         case _ => Left(Forbidden)

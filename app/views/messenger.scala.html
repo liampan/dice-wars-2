@@ -1,0 +1,17 @@
+
+@(messages: Seq[String])
+<div style="display:flex; flex-direction: column; min-height: 250px;">
+    <div style="max-height: 230px; overflow: scroll;">
+        @messages.map { msg =>
+          <p>@msg</p>
+        }
+    </div>
+
+    <div style="margin-top: auto;">
+        <form onsubmit="sendMessage(msg.value)" action="javascript:void(0);" >
+            <input type="text" name="msg">
+            <button type="submit">send</button>
+        </form>
+    </div>
+</div>
+
