@@ -1,3 +1,4 @@
+let wsUrl = "/" + document.getElementById("ws-js").getAttribute("location")
 var webSocketRetryDelay = 5;
 
 var socket;
@@ -5,7 +6,7 @@ var socket;
 function webSocket() {
     var host = window.location.host;
     let protocol = (("http:" == window.location.protocol) ? "ws" : "wss");
-    let url = protocol + "://" + host + "/ws"
+    let url = protocol + "://" + host + wsUrl
     console.log(url);
     socket = new WebSocket(url);
     console.log(socket)
@@ -27,7 +28,7 @@ function sendMessage(msg) {
 function onMessage(evt) {
     var received_msg = evt.data;
     document.getElementById('screen').innerHTML = received_msg;
-    document.querySelector('[autofocus]').focus()
+//    document.querySelector('[autofocus]').focus()
 }
 
 function onClose(evt) {

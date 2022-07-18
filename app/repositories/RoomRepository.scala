@@ -1,43 +1,74 @@
 package repositories
 
 import akka.actor.ActorRef
+import models.game.Game
+import repositories.WaitingRoomRepository.{getRoom, rooms}
 
-trait RoomRepository {
-  def getRoom(roomId: String): Room
-
-  def addToRoom(room: String, af: ActorRef): Unit
-
-  def leaveAllRooms(af: ActorRef): Unit
-
-}
-
-case class Room(participants: Set[ActorRef], messages: Seq[String] = Seq.empty) {
+//todo give participants names?
+case class WaitingRoom(participants: Set[ActorRef]){
   def addParticipant(p: ActorRef) = this.copy(participants = participants + p)
   def removeParticipant(p: ActorRef) = this.copy(participants - p)
-  def addMsg(msg: String) = this.copy(messages = messages :+ msg)
+
+  def startGame(game: Game): GameRoom = GameRoom(participants, game)
 }
 
-object Room {
-  def empty = Room(Set.empty)
+
+case class GameRoom(participants: Set[ActorRef], game: Game) {
+  def addParticipant(p: ActorRef) = this.copy(participants = participants + p)
+
+  def handleMsg(msg: String) = this //this is where a turn is taken on the game
 }
 
-object RoomRepository extends RoomRepository {
+object WaitingRoom {
+  def empty: WaitingRoom = WaitingRoom(Set.empty)
+}
 
-  //room id -> participants
-  private var rooms: Map[String, Room] = Map.empty.withDefault(_ => Room(Set.empty))
 
-  def getRoom(roomId: String): Room = {
+object GameRoomRepository {
+  private var rooms: Map[String, GameRoom] = Map.empty
+
+  def cleanUp =
+    rooms = rooms.filter{case (_, room) => room.participants.nonEmpty }
+
+  def updateRoom(roomId: String, room: GameRoom) = rooms = rooms.updated(roomId, room)
+
+  def addRoom(roomId: String, room: GameRoom) = rooms = rooms + (roomId -> room)
+
+  def addToRoom(roomId: String, af: ActorRef) =
+    rooms = rooms.updated(roomId, getRoom(roomId).addParticipant(af))
+
+  def getRoom(roomId: String): GameRoom = {
     cleanUp
-    rooms.getOrElse(roomId, Room.empty)
+    rooms.getOrElse(roomId, throw new IllegalArgumentException(s"room: '$roomId' does not exist"))
   }
 
-  def updateRoom(roomId: String, room: Room) = rooms = rooms.updated(roomId, room)
-
-  def addMsg(roomId: String, msg: String) = {
-    val room = getRoom(roomId).addMsg(msg)
+  def handleMsg(roomId: String, msg: String) = {
+    val room = getRoom(roomId).handleMsg(msg)
     updateRoom(roomId, room)
-    println(rooms)
     room
+  }
+}
+
+object WaitingRoomRepository {
+
+  //room id -> participants
+  private var rooms: Map[String, WaitingRoom] = Map.empty.withDefault(_ => WaitingRoom(Set.empty))
+
+  def getRoom(roomId: String): WaitingRoom = {
+    cleanUp
+    rooms.getOrElse(roomId, WaitingRoom.empty)
+  }
+
+  def updateRoom(roomId: String, room: WaitingRoom) = rooms = rooms.updated(roomId, room)
+
+  def migrateToGameRoom(roomId: String, game: Game) = {
+    val waitingRoom = getRoom(roomId)
+    GameRoomRepository.addRoom(roomId, GameRoom(waitingRoom.participants, game))
+    removeRoom(roomId)
+  }
+
+  def removeRoom(roomId: String) = {
+    rooms = rooms.filter(_._1 != roomId)
   }
 
   def addToRoom(roomId: String, af: ActorRef) =

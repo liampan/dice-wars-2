@@ -1,0 +1,19 @@
+@this(main: main)
+
+@()
+
+@main("Game"){
+
+    <h2>Game</h2>
+
+    <div id="screen">
+        delete me
+        <!--  This will be populated by the websocket, with the HexView.  -->
+    </div>
+}
+
+<script type="text/javascript"
+        id="ws-js"
+        location="ws-game"
+        src="@routes.Assets.at("javascripts/webSocket.js")"
+        async defer></script>

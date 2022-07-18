@@ -6,7 +6,7 @@ import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponent
 import services.game.BoardGenerator
 import views.html.game.HexView
 
-class TestViewController @Inject()(view: HexView,
+class TestViewController @Inject()(
                                    cc: ControllerComponents,
                                    boardGenerator: BoardGenerator
                                   ) extends AbstractController(cc) {
@@ -14,7 +14,7 @@ class TestViewController @Inject()(view: HexView,
   def onPageLoad(): Action[AnyContent] = Action {
     val game = boardGenerator.create(Settings(23, 30, 10, 10, 30))
 //    val game = boardGenerator.create(Settings(10, 15, 2, 5, 10))
-    Ok(view(game))
+    Ok(HexView(game))
   }
 
 

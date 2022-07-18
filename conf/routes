@@ -1,9 +1,12 @@
 
-GET     /                            controllers.TestViewController.onPageLoad()
+GET     /test                          controllers.TestViewController.onPageLoad()
 
-GET     /user/:id                     controllers.HomeController.enterRoom(id)
+GET     /join/:id                      controllers.GameController.waitingRoom(id)
+GET     /start/:id                     controllers.GameController.startGame(id)
+GET     /game                          controllers.GameController.game()
 
-GET     /ws                           controllers.HomeController.socket
+GET     /ws-wait                           controllers.GameController.socketWaitingRoom
+GET     /ws-game                           controllers.GameController.socketGameRoom
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file                 controllers.Assets.at(path="/public", file)

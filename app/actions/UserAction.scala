@@ -1,6 +1,7 @@
 package actions
 
 import com.google.inject.{ImplementedBy, Inject}
+import controllers.GameController.userIdKey
 import models.auth
 import models.auth.UserActionRequest
 import play.api.Logger
@@ -20,7 +21,7 @@ class UserActionImpl @Inject()(
                               )(implicit val executionContext: ExecutionContext)
   extends UserAction {
   override protected def transform[A](request: Request[A]): Future[UserActionRequest[A]] = {
-    request.session.get("username").fold[Future[UserActionRequest[A]]] {
+    request.session.get(userIdKey).fold[Future[UserActionRequest[A]]] {
       Future.successful(UserActionRequest(request, UUID.randomUUID().toString.takeRight(5)))
     }{
       username => Future.successful(UserActionRequest(request, username))

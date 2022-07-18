@@ -1,7 +1,5 @@
 @import models.game._
 
-@this(main: main)
-
 @(game: Game)
 
 @stroke(borders: Seq[Int], color: String)= @{
@@ -52,34 +50,23 @@ val bCss = Map(
         case _ => "limegreen"
     }
 }
-
-
-@main("hexes"){
-
-<h2>hexes:</h2>
-
-<div id="screen"  class="aztec" style="border: solid red 2px;width: 1000px;height: 700px;position: relative;">
-
-    @game.boardState.map{ territory =>
-<!--            <span style="top:@{territory.topPx}px;left:@{territory.leftPx}px;position: absolute;z-index:10;">-->
-<!--                @territory.team.number-->
-<!--            </span>-->
-        <span class="borderParent" style="color: @{getColor(territory.team)}">
-        @territory.hexes.map{ hex: Hex =>
-            <div class="borderChild" style="top:@{hex.topPx}px;left:@{hex.leftPx}px;width: 28px;height: 20px;position: absolute; font-size:53px;padding-left:5px;@stroke(hex.needsBorder(territory.hexes), getColor(territory.team));">
-                &#x2B22;
-            </div>
+<div style="overflow: hidden;">
+    <div>
+        <h2>Player 1's turn</h2>
+    </div>
+    <div class="aztec" style="border: solid red 2px;width: 1000px;height: 700px;position: relative;float:left;">
+        @game.boardState.map{ territory =>
+            <span class="borderParent" style="color: @{getColor(territory.team)}">
+                @territory.hexes.map{ hex: Hex =>
+                    <div class="borderChild" style="top:@{hex.topPx}px;left:@{hex.leftPx}px;width: 28px;height: 20px;position: absolute; font-size:53px;padding-left:5px;@stroke(hex.needsBorder(territory.hexes), getColor(territory.team));">
+                        &#x2B22;
+                    </div>
+                }
+            </span>
         }
-        </span>
-    }
+    </div>
+    <div style="border: solid blue 2px;width: 250px;height: 700px;position: relative;float:left;">
 
-<!--    @game.hexes.map{ case (hex, team) =>-->
-<!--        <div style="top:@{hex.topPx}px;left:@{hex.leftPx}px;width: 28px;height: 20px;position: absolute;color: @{getColor(team)}; font-size:53px;padding-left:5px;">-->
-<!--            &#x2B22;-->
-<!--        </div>-->
-<!--    }-->
-
+    </div>
 </div>
-
-}
 

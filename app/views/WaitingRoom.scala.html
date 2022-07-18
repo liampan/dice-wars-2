@@ -1,0 +1,23 @@
+@this(main: main)
+
+@(gameId: String)
+
+@main("Staring dice wars 2"){
+
+<h1>Waiting Room</h1>
+
+
+<a href="@routes.GameController.startGame(gameId)">Start</a>
+
+<div id="screen">
+        delete me
+        <!--  This will be populated by the websocket, with the HexView.  -->
+</div>
+
+}
+
+<script type="text/javascript"
+        id="ws-js"
+        location="ws-wait"
+        src="@routes.Assets.at("javascripts/webSocket.js")"
+        async defer></script>
