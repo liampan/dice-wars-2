@@ -1,4 +1,6 @@
 
+GET     /                            controllers.TestViewController.onPageLoad()
+
 GET     /user/:id                     controllers.HomeController.enterRoom(id)
 
 GET     /ws                           controllers.HomeController.socket

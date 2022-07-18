@@ -1,0 +1,85 @@
+@import models.game._
+
+@this(main: main)
+
+@(game: Game)
+
+@stroke(borders: Seq[Int], color: String)= @{
+
+def getVectors(width: Double): (Double, Double) = {
+(width * 0.5, width * 0.875)
+}
+
+val pixels = 2.25
+val blur = 0.5
+val (right, down) = getVectors(pixels)
+
+val bCss = Map(
+    //    r   d   b   color
+    1 -> s"-${pixels}px 0px ${blur}px #000",
+    2 -> s"-${right}px -${down}px ${blur}px #000",
+    3 -> s"${right}px -${down}px ${blur}px #000",
+    4 -> s"${pixels}px 0px ${blur}px #000",
+    5 -> s"${right}px ${down}px ${blur}px #000",
+    6 -> s"-${right}px ${down}px ${blur}px #000"
+)
+    val cCss = Map(
+    //    r   d   b   color
+    1 -> s"-${pixels}px 0px ${blur}px $color",
+    2 -> s"-${right}px -${down}px ${blur}px $color",
+    3 -> s"${right}px -${down}px ${blur}px $color",
+    4 -> s"${pixels}px 0px ${blur}px $color",
+    5 -> s"${right}px ${down}px ${blur}px $color",
+    6 -> s"-${right}px ${down}px ${blur}px $color"
+    )
+
+    val notBorders = Seq(1, 2, 3, 4, 5, 6).filterNot(borders.contains)
+
+    (notBorders.map(cCss) ++ borders.map(bCss)).mkString("text-shadow: ", ", ", "")
+}
+
+@getColor(team: Team) = @{
+    team.number match{
+        case 0 => "green"
+        case 1 => "red"
+        case 2 => "orange"
+        case 3 => "blue"
+        case 4 => "magenta"
+        case 5 => "Gold"
+        case 6 => "LightSlateGray"
+        case 7 => "NavajoWhite"
+        case 8 => "RosyBrown"
+        case _ => "limegreen"
+    }
+}
+
+
+@main("hexes"){
+
+<h2>hexes:</h2>
+
+<div id="screen"  class="aztec" style="border: solid red 2px;width: 1000px;height: 700px;position: relative;">
+
+    @game.boardState.map{ territory =>
+<!--            <span style="top:@{territory.topPx}px;left:@{territory.leftPx}px;position: absolute;z-index:10;">-->
+<!--                @territory.team.number-->
+<!--            </span>-->
+        <span class="borderParent" style="color: @{getColor(territory.team)}">
+        @territory.hexes.map{ hex: Hex =>
+            <div class="borderChild" style="top:@{hex.topPx}px;left:@{hex.leftPx}px;width: 28px;height: 20px;position: absolute; font-size:53px;padding-left:5px;@stroke(hex.needsBorder(territory.hexes), getColor(territory.team));">
+                &#x2B22;
+            </div>
+        }
+        </span>
+    }
+
+<!--    @game.hexes.map{ case (hex, team) =>-->
+<!--        <div style="top:@{hex.topPx}px;left:@{hex.leftPx}px;width: 28px;height: 20px;position: absolute;color: @{getColor(team)}; font-size:53px;padding-left:5px;">-->
+<!--            &#x2B22;-->
+<!--        </div>-->
+<!--    }-->
+
+</div>
+
+}
+
