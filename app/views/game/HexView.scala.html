@@ -38,22 +38,25 @@ val bCss = Map(
 
 @getColor(team: Team) = @{
     team.number match{
-        case 0 => "green"
-        case 1 => "red"
-        case 2 => "orange"
-        case 3 => "blue"
-        case 4 => "magenta"
-        case 5 => "Gold"
+        case 1 => "green"
+        case 2 => "red"
+        case 3 => "orange"
+        case 4 => "blue"
+        case 5 => "magenta"
         case 6 => "LightSlateGray"
-        case 7 => "NavajoWhite"
-        case 8 => "RosyBrown"
+        case 7 => "Gold"
+        case 8 => "NavajoWhite"
+        case 9 => "RosyBrown"
         case _ => "limegreen"
     }
 }
+@turnClass(isTurn: Boolean, stillIn: Boolean) = @{
+    if (isTurn) "border-radius: 12px;border: 2px solid green;"
+    else if (!stillIn) "text-decoration: line-through;"
+    else ""
+}
+
 <div style="overflow: hidden;">
-    <div>
-        <h2>Player 1's turn</h2>
-    </div>
     <div class="aztec" style="border: solid red 2px;width: 58.5vw;height: 41.5vw;position: relative;float:left;">
         @game.boardState.map{ territory =>
             <span class="borderParent" style="color: @{getColor(territory.team)}">
@@ -66,7 +69,14 @@ val bCss = Map(
         }
     </div>
     <div style="border: solid blue 2px;width: 20vw;height: 41.5vw;position: relative;float:left;">
+            <p>Turn: @{game.turn}</p>
 
+                @game.turnStatus.map{ case (team, isTurn, stillIn) =>
+                    <div style="width: 50%;@turnClass(isTurn, stillIn)">
+                        <span style="padding-left:1vw;color: @{getColor(team)}">&#x2B22;</span>
+                        <span style="padding-left:1vw;">team: @team.number</span>
+                    </div>
+                }
     </div>
 </div>
 
