@@ -12,7 +12,7 @@ class TestViewController @Inject()(
                                   ) extends AbstractController(cc) {
 
   def onPageLoad(): Action[AnyContent] = Action {
-    val game = boardGenerator.create(Settings(23, 30, 5, 10, 30))
+    val game = boardGenerator.create(Settings(23, 30, 5, 10, 30), Seq())
 //    val game = boardGenerator.create(Settings(10, 15, 2, 5, 10))
     Ok(HexView(game))
   }

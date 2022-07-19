@@ -31,6 +31,7 @@ function onMessage(evt) {
 //    document.querySelector('[autofocus]').focus()
 }
 
+
 function onClose(evt) {
     console.log("Websocket closed, trying to reconnect in "+ webSocketRetryDelay + " seconds")
 

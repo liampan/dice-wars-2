@@ -1,16 +1,16 @@
 package controllers
 
 import actions.UserAction
-import akka.actor.ActorSystem
+import akka.actor.{ActorPath, ActorRef, ActorSystem}
 import akka.stream.Materializer
 import com.google.inject.Inject
 import controllers.GameController.{roomKey, userIdKey}
-import models.game.Settings
+import models.game.{AITeam, PlayerTeam, Settings, Team}
 import play.api.libs.streams.ActorFlow
-import play.api.mvc._
+import play.api.mvc.{Range => _, _}
 import repositories.WaitingRoomRepository
 import services.game.BoardGenerator
-import views.html.{WaitingRoom, Index}
+import views.html.{Index, WaitingRoom}
 
 import scala.concurrent.Future
 
@@ -27,7 +27,19 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
   }
 
   def startGame(room: String): Action[AnyContent] = userAction {
-    val game = boardGenerator.create(Settings(23, 30, 10, 10, 30))
+    val settings = Settings(23, 30, 10, 10, 30)
+    val participants = WaitingRoomRepository.getRoom(room)
+      .participants
+
+    val teams = Range.inclusive(1, settings.numberOfTeams).map{teamNumber =>
+      participants
+        .toSeq
+        .zipWithIndex
+        .find(_._2+1 == teamNumber)
+        .fold[Team](AITeam(teamNumber))(player => PlayerTeam(player._1.userId, teamNumber))
+    }
+
+    val game = boardGenerator.create(settings, teams)
     WaitingRoomRepository.migrateToGameRoom(room, game)
     Redirect(routes.GameController.game())
   }
