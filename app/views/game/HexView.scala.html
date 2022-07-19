@@ -1,6 +1,6 @@
 @import models.game._
 
-@(game: Game, userId: String)
+@(game: Game, userId: String, gameOver: Boolean = false)
 
 @stroke(borders: Seq[Int], color: String)= @{
 
@@ -56,7 +56,7 @@ val bCss = Map(
     else ""
 }
 
-@territoryClasses(team: Team, territory: Territory) = @{
+@territoryClasses(team: Player, territory: Territory) = @{
     Seq(
         Some("cursorPoint"),
         Some("borderParent").filter(_ => territory.belongsTo(team) || team.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory))),
@@ -64,7 +64,7 @@ val bCss = Map(
     ).collect{case Some(clazz) => clazz}.mkString(" ")
 }
 
-@territoryClassesOnClick(team: Team, territory: Territory) = @{
+@territoryClassesOnClick(team: Player, territory: Territory) = @{
     if(territory.belongsTo(team)) {
         s"sendMessage('click-mine-${territory.id}')"
     } else if (team.clickedTerritoryId.isDefined && team.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory))){
@@ -72,6 +72,9 @@ val bCss = Map(
     } else "null"
 }
 
+@if(gameOver){
+    <h1>GAME OVER</h1>
+}
 <div style="overflow: hidden;">
     <div class="aztec" style="border: solid red 2px;width: 58.5vw;height: 41.5vw;position: relative;float:left;">
         @game.boardState.map{ territory =>

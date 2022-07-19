@@ -83,6 +83,12 @@ case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Playe
   def teamIsStillInPlay(team: Player) =
     boardState.exists(_.team == team.number)
 
+  def humanPlayersLeft: Boolean =
+    teams.filter(_.isInstanceOf[Human]).exists(teamIsStillInPlay)
+
+  def gameComplete: Boolean =
+    boardState.map(_.team).distinct.size == 1
+
   def isAITurn: Boolean = thisTurn.isAI
   def thisTurnIsOut = !teamIsStillInPlay(thisTurn)
 
