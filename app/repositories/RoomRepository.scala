@@ -3,7 +3,8 @@ package repositories
 import akka.actor.ActorRef
 import controllers.Player
 import models.game.Game
-import repositories.WaitingRoomRepository.{getRoom, rooms}
+
+import scala.util.matching.Regex
 
 //todo give participants names?
 case class WaitingRoom(participants: Set[Player]){
@@ -17,12 +18,21 @@ case class WaitingRoom(participants: Set[Player]){
 case class GameRoom(participants: Set[Player], game: Game) {
   def addParticipant(p: Player) = this.copy(participants = participants + p)
 
+  //create a commands object that creates regex
+  private val ClickMine: Regex = "click-mine-(.*)".r
+  private val ClickTheirs: Regex = "click-theirs-(.*)".r
+
   def handleMsg(user: String, msg: String): GameRoom = msg match {
+    case ClickMine(id) => check(_.rightPlayer(user))(_.clickMine(user, id))
+    case ClickTheirs(id) => check(_.rightPlayer(user))(_.attack(user, id))
     case "end-turn" => this.copy(game = game.endTurn(user))
-    case "ai-turn" => if(game.isAITurn) this.copy(game = game.playThisAITurn) else this
-    case "skip-turn" => if(game.thisTurnIsOut) this.copy(game = game.skipTurn) else this
+    case "ai-turn" => check(_.isAITurn)(_.playThisAITurn)
+    case "skip-turn" => check(_.thisTurnIsOut)(_.skipTurn)
     case _ => this
   }
+
+  private def check(f: Game => Boolean)(g: Game => Game) =
+    if (f(game)) this.copy(game = g(game)) else this
 }
 
 object WaitingRoom {

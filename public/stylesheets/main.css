@@ -1,6 +1,12 @@
+.cursorPoint {
+    cursor: pointer;
+}
 
 .borderParent .borderChild {
-cursor: pointer;
+}
+
+.clickedTerritory{
+    color: black !important;
 }
 
 .borderParent:hover .borderChild, .borderParent.hover .borderChild {

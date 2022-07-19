@@ -36,8 +36,8 @@ val bCss = Map(
     (notBorders.map(cCss) ++ borders.map(bCss)).mkString("text-shadow: ", ", ", "")
 }
 
-@getColor(team: Team) = @{
-    team.number match{
+@getColor(team: Int) = @{
+    team match{
         case 1 => "green"
         case 2 => "red"
         case 3 => "orange"
@@ -56,10 +56,26 @@ val bCss = Map(
     else ""
 }
 
+@territoryClasses(team: Team, territory: Territory) = @{
+    Seq(
+        Some("cursorPoint"),
+        Some("borderParent").filter(_ => territory.belongsTo(team) || team.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory))),
+        Some("clickedTerritory").filter(_ => team.clickedTerritoryId.contains(territory.id))
+    ).collect{case Some(clazz) => clazz}.mkString(" ")
+}
+
+@territoryClassesOnClick(team: Team, territory: Territory) = @{
+    if(territory.belongsTo(team)) {
+        s"sendMessage('click-mine-${territory.id}')"
+    } else if (team.clickedTerritoryId.isDefined && team.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory))){
+        s"sendMessage('click-theirs-${territory.id}')"
+    } else "null"
+}
+
 <div style="overflow: hidden;">
     <div class="aztec" style="border: solid red 2px;width: 58.5vw;height: 41.5vw;position: relative;float:left;">
         @game.boardState.map{ territory =>
-            <span class="borderParent" style="color: @{getColor(territory.team)}">
+            <span class="@territoryClasses(game.thisTurn, territory)" style="color: @{getColor(territory.team)}" onclick="@territoryClassesOnClick(game.thisTurn, territory)">
                 @territory.hexes.map{ hex: Hex =>
                     <div class="borderChild" style="top:@{hex.topPx}vw;left:@{hex.leftPx}vw;position: absolute; font-size:3vw;padding-left:0.5vw;@stroke(hex.needsBorder(territory.hexes), getColor(territory.team));">
                         &#x2B22;
@@ -73,12 +89,12 @@ val bCss = Map(
 
                 @game.turnStatus.map{ case (team, isTurn, stillIn) =>
                     <div style="width: 50%;@turnClass(isTurn, stillIn)">
-                        <span style="padding-left:1vw;color: @{getColor(team)}">&#x2B22;</span>
+                        <span style="padding-left:1vw;color: @{getColor(team.number)}">&#x2B22;</span>
                         <span style="padding-left:1vw;">team: @team.number</span>
                     </div>
                 }
 
-            @if(game.thisTurn.userId == userId) {
+            @if(game.rightPlayer(userId)) {
                 <button onclick="sendMessage('end-turn')">
                     End turn
                 </button>

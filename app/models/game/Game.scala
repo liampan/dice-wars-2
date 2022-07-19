@@ -13,11 +13,13 @@ case class Settings(
 trait Team {
   val userId: String
   val number: Int
+  val clickedTerritoryId: Option[String]
 }
 
-case class PlayerTeam(userId: String, number: Int) extends Team
+case class PlayerTeam(userId: String, number: Int, clickedTerritoryId: Option[String] = None) extends Team
 
 case class AITeam(number: Int, userId: String = UUID.randomUUID().toString.takeRight(6)) extends Team {
+  val clickedTerritoryId: Option[String] = None //do AI's need to click?
 
   //todo how does AI play?
   def playTurn(game: Game): Game = {
@@ -28,15 +30,37 @@ case class AITeam(number: Int, userId: String = UUID.randomUUID().toString.takeR
 
 case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Team], turn: Int = 0) { //skip turn if player is out
 
+  def getTerritoryById(id: String): Option[Territory] = boardState.find(_.id == id)
+
+  def rightPlayer(userId: String): Boolean = thisTurn.userId.toUpperCase == userId.toUpperCase
+
+  def clickMine(userId: String, territoryId: String): Game = {
+    val updated = thisTurn
+      .asInstanceOf[PlayerTeam]
+      .copy(clickedTerritoryId = Some(territoryId))
+    copy(teams = teams.updated(teams.indexOf(thisTurn), updated))
+  }
+
+  //todo actually resolve dice
+  def attack(userId: String, territoryId: String): Game = {
+    val enemyTerritory = boardState.find(_.id == territoryId).getOrElse(throw new Exception("Territory is missing"))
+    val updated = enemyTerritory.copy(team = thisTurn.number)
+    val player = thisTurn.asInstanceOf[PlayerTeam].copy(clickedTerritoryId = None)
+    copy(
+      boardState = boardState.updated(boardState.indexOf(enemyTerritory), updated),
+      teams = teams.updated(teams.indexOf(thisTurn), player)
+    )
+  }
+
   def thisTurn = teams.find((turn%settings.numberOfTeams)+1 == _.number).getOrElse(throw new Exception("Team is missing"))
 
   //(team, isTurn, stillIn)
   def turnStatus: Seq[(Team, Boolean, Boolean)] = teams.map{
-    team => (team, (turn%settings.numberOfTeams)+1 == team.number, boardState.exists(_.team == team))
+    team => (team, (turn%settings.numberOfTeams)+1 == team.number, boardState.exists(_.team == team.number))
   }
 
   def isAITurn = thisTurn.isInstanceOf[AITeam]
-  def thisTurnIsOut = !boardState.exists(_.team == thisTurn)
+  def thisTurnIsOut = !boardState.exists(_.team == thisTurn.number)
 
 
   def playThisAITurn =
@@ -45,8 +69,7 @@ case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Team]
   //todo
   // - distribute dice
   def endTurn(userId: String): Game =
-    if (thisTurn.userId.toUpperCase == userId.toUpperCase)
-      this.copy(turn = turn + 1)
+    if (rightPlayer(userId)) this.copy(turn = turn + 1)
     else this //this person should not have sent end turn.
 
 
