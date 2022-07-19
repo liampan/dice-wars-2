@@ -8,7 +8,7 @@ import views.html.game.HexView
 
 class TestViewController @Inject()(
                                    cc: ControllerComponents,
-                                   boardGenerator: BoardGenerator
+                                   boardGenerator: BoardGenerator,
                                   ) extends AbstractController(cc) {
 
   def onPageLoad(): Action[AnyContent] = Action {
