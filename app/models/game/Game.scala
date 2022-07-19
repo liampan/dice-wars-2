@@ -10,44 +10,62 @@ case class Settings(
                    maxTerritorySize: Int
                    )
 
-trait Team {
+trait Player {
   val userId: String
   val number: Int
   val clickedTerritoryId: Option[String]
+  val isAI: Boolean
+  def noClick: Player
 }
 
-case class PlayerTeam(userId: String, number: Int, clickedTerritoryId: Option[String] = None) extends Team
+case class Human(userId: String, number: Int, clickedTerritoryId: Option[String] = None, isAI: Boolean = false) extends Player{
+  override def noClick: Player = this.copy(clickedTerritoryId = None)
+}
 
-case class AITeam(number: Int, userId: String = UUID.randomUUID().toString.takeRight(6)) extends Team {
-  val clickedTerritoryId: Option[String] = None //do AI's need to click?
+case class AI(number: Int) extends Player {
+  override val clickedTerritoryId: Option[String] = None
+  override val isAI: Boolean = true
+  override val userId: String = "AI_" + UUID.randomUUID().toString.takeRight(5)
+  override def noClick: Player = this
 
   //todo how does AI play?
   def playTurn(game: Game): Game = {
-    Thread.sleep(1000)
-    game.endTurn(userId)
+    Thread.sleep(700)
+    val ownTerritory = game.boardState.filter(_.team == number).head
+    ownTerritory.attackable(game.boardState.toSet)
+      .headOption
+      .map(attackble =>
+        game.attack(ownTerritory.id, attackble.id)
+    )
+      .getOrElse(game)
+      .endTurn(userId)
   }
 }
 
-case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Team], turn: Int = 0) { //skip turn if player is out
+
+case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Player], turn: Int = 0) { //skip turn if player is out
 
   def getTerritoryById(id: String): Option[Territory] = boardState.find(_.id == id)
 
   def rightPlayer(userId: String): Boolean = thisTurn.userId.toUpperCase == userId.toUpperCase
 
   def clickMine(userId: String, territoryId: String): Game = {
-    val updated = thisTurn
-      .asInstanceOf[PlayerTeam]
-      .copy(clickedTerritoryId = Some(territoryId))
+    val updated = thisTurn.asInstanceOf[Human].copy(clickedTerritoryId = Some(territoryId))
     copy(teams = teams.updated(teams.indexOf(thisTurn), updated))
   }
 
+  def attack(enemyTerritoryId: String): Game = {
+    val ownTerritoryId = thisTurn.clickedTerritoryId.getOrElse(throw new Exception(""))
+    attack(ownTerritoryId, enemyTerritoryId)
+  }
+
   //todo actually resolve dice
-  def attack(userId: String, territoryId: String): Game = {
-    val ownTerritory = boardState.find(_.id == thisTurn.clickedTerritoryId.getOrElse(throw new Exception(""))).getOrElse(throw new Exception("Enemy Territory is missing"))
-    val enemyTerritory = boardState.find(_.id == territoryId).getOrElse(throw new Exception("Enemy Territory is missing"))
+  def attack(friendlyTerritoryId: String, enemyTerritoryId: String): Game = {
+    val ownTerritory = boardState.find(_.id == friendlyTerritoryId).getOrElse(throw new Exception("Friendly Territory is missing"))
+    val enemyTerritory = boardState.find(_.id == enemyTerritoryId).getOrElse(throw new Exception("Enemy Territory is missing"))
      if (ownTerritory.attackable(Set(enemyTerritory)).contains(enemyTerritory)) {
        val updated = enemyTerritory.copy(team = thisTurn.number)
-       val player = thisTurn.asInstanceOf[PlayerTeam].copy(clickedTerritoryId = None)
+       val player = thisTurn.noClick
        copy(
          boardState = boardState.updated(boardState.indexOf(enemyTerritory), updated),
          teams = teams.updated(teams.indexOf(thisTurn), player)
@@ -55,19 +73,22 @@ case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Team]
      } else throw new Exception("trying to attack a non attack able territory")
   }
 
-  def thisTurn = teams.find((turn%settings.numberOfTeams)+1 == _.number).getOrElse(throw new Exception("Team is missing"))
+  def thisTurn: Player = teams.find((turn%settings.numberOfTeams)+1 == _.number).getOrElse(throw new Exception("Team is missing"))
 
   //(team, isTurn, stillIn)
-  def turnStatus: Seq[(Team, Boolean, Boolean)] = teams.map{
-    team => (team, (turn%settings.numberOfTeams)+1 == team.number, boardState.exists(_.team == team.number))
+  def turnStatus: Seq[(Player, Boolean, Boolean)] = teams.map{
+    team => (team, (turn%settings.numberOfTeams)+1 == team.number, teamIsStillInPlay(team))
   }
 
-  def isAITurn = thisTurn.isInstanceOf[AITeam]
-  def thisTurnIsOut = !boardState.exists(_.team == thisTurn.number)
+  def teamIsStillInPlay(team: Player) =
+    boardState.exists(_.team == team.number)
+
+  def isAITurn: Boolean = thisTurn.isAI
+  def thisTurnIsOut = !teamIsStillInPlay(thisTurn)
 
 
   def playThisAITurn =
-    thisTurn.asInstanceOf[AITeam].playTurn(this)
+    thisTurn.asInstanceOf[AI].playTurn(this)
 
   //todo
   // - distribute dice

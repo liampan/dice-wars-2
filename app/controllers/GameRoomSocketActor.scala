@@ -7,7 +7,7 @@ import views.html.game.HexView
 
 object GameRoomSocketActor {
   def props(out: ActorRef, user: String, roomId: String): Props = {
-    addToRoom(roomId, Player(user, out))
+    addToRoom(roomId, PlayerActor(user, out))
     Props(new GameRoomSocketActor(out, user, roomId))
   }
 }
@@ -18,8 +18,8 @@ class GameRoomSocketActor(out: ActorRef, user: String, roomId: String) extends A
     case msg: String =>
       val room: GameRoom = handleMsg(roomId, user, msg)
       room.participants.foreach(_.actor ! HexView(room.game, user).toString)
-      if (room.game.thisTurnIsOut) receive("skip-turn") else ()
-      if (room.game.isAITurn) receive("ai-turn") else ()
+      if (room.game.thisTurnIsOut) receive("skip-turn")
+      if (room.game.isAITurn) receive("ai-turn")
   }
 
   override def postStop(): Unit = {

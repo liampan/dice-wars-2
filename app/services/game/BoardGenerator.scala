@@ -1,7 +1,7 @@
 package services.game
 
 import com.google.inject.Inject
-import models.game.{Game, Hex, Settings, Team, Territory}
+import models.game.{Game, Hex, Settings, Player, Territory}
 
 import scala.annotation.tailrec
 import scala.util.{Random => ScalaRandom}
@@ -47,7 +47,7 @@ class BoardGenerator @Inject()(random: ScalaRandom = ScalaRandom) {
     val territories: Seq[Territory] = gen(initHexes.toSet, Seq.empty, 0)
       .filter(_.size >= settings.minTerritorySize)
       .zipWithIndex
-      .map{case (hexes, i) => Territory(hexes, i%settings.numberOfTeams)}
+      .map{case (hexes, i) => Territory(hexes, (i%settings.numberOfTeams)+1)}
 
     validateTerritories(territories).getOrElse(generateTerritories(settings))
   }
@@ -66,7 +66,7 @@ class BoardGenerator @Inject()(random: ScalaRandom = ScalaRandom) {
     Some(territory).filter(_ => checkNeighbors(Seq(territory.head), territory.tail))
   }
 
-  def create(settings: Settings, teams: Seq[Team]): Game = {
+  def create(settings: Settings, teams: Seq[Player]): Game = {
     val territories = generateTerritories(settings)
 
     Game(settings = settings, boardState = territories, teams = teams)

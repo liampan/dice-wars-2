@@ -4,7 +4,7 @@ import java.util.UUID
 
 final case class Territory(hexes: Set[Hex], team: Int, id: String = UUID.randomUUID().toString) {
 
-  def belongsTo(t: Team): Boolean = t.number == team
+  def belongsTo(t: Player): Boolean = t.number == team
 
   private val row = hexes.toSeq.map(_.row).groupBy(i => i).mapValues(_.size).maxBy(_._2)._1
   private val column = hexes.toSeq.map(_.column).groupBy(i => i).mapValues(_.size).maxBy(_._2)._1

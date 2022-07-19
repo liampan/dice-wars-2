@@ -4,11 +4,11 @@ import akka.actor._
 import repositories.WaitingRoom
 import repositories.WaitingRoomRepository._
 
-case class Player(userId: String, actor: ActorRef)
+case class PlayerActor(userId: String, actor: ActorRef)
 
 object WaitingRoomSocketActor {
   def props(out: ActorRef, user: String, roomId: String): Props = {
-    addToRoom(roomId, Player(user, out))
+    addToRoom(roomId, PlayerActor(user, out))
     Props(new WaitingRoomSocketActor(out, user, roomId))
   }
 }

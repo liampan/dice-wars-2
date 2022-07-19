@@ -5,7 +5,7 @@ import akka.actor.{ActorPath, ActorRef, ActorSystem}
 import akka.stream.Materializer
 import com.google.inject.Inject
 import controllers.GameController.{roomKey, userIdKey}
-import models.game.{AITeam, PlayerTeam, Settings, Team}
+import models.game.{AI, Human, Player, Settings}
 import play.api.libs.streams.ActorFlow
 import play.api.mvc.{Range => _, _}
 import repositories.WaitingRoomRepository
@@ -26,6 +26,7 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
       Ok(waitingRoomView(room)).addingToSession(userIdKey -> request.userName, roomKey -> room)(request)
   }
 
+  //this should be a post, from the start screen maybe?
   def startGame(room: String): Action[AnyContent] = userAction {
     val settings = Settings(23, 30, 10, 10, 30)
     val participants = WaitingRoomRepository.getRoom(room)
@@ -36,7 +37,7 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
         .toSeq
         .zipWithIndex
         .find(_._2+1 == teamNumber)
-        .fold[Team](AITeam(teamNumber))(player => PlayerTeam(player._1.userId, teamNumber))
+        .fold[Player](AI(teamNumber))(player => Human(player._1.userId, teamNumber))
     }
 
     val game = boardGenerator.create(settings, teams)

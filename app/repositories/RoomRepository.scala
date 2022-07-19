@@ -1,22 +1,22 @@
 package repositories
 
 import akka.actor.ActorRef
-import controllers.Player
+import controllers.PlayerActor
 import models.game.Game
 
 import scala.util.matching.Regex
 
 //todo give participants names?
-case class WaitingRoom(participants: Set[Player]){
-  def addParticipant(p: Player) = this.copy(participants = participants + p)
+case class WaitingRoom(participants: Set[PlayerActor]){
+  def addParticipant(p: PlayerActor) = this.copy(participants = participants + p)
   def removeParticipant(p: ActorRef) = this.copy(participants.filterNot(_.actor == p))
 
   def startGame(game: Game): GameRoom = GameRoom(participants, game)
 }
 
 
-case class GameRoom(participants: Set[Player], game: Game) {
-  def addParticipant(p: Player) = this.copy(participants = participants + p)
+case class GameRoom(participants: Set[PlayerActor], game: Game) {
+  def addParticipant(p: PlayerActor) = this.copy(participants = participants + p)
 
   //create a commands object that creates regex
   private val ClickMine: Regex = "click-mine-(.*)".r
@@ -24,7 +24,7 @@ case class GameRoom(participants: Set[Player], game: Game) {
 
   def handleMsg(user: String, msg: String): GameRoom = msg match {
     case ClickMine(id) => check(_.rightPlayer(user))(_.clickMine(user, id))
-    case ClickTheirs(id) => check(_.rightPlayer(user))(_.attack(user, id))
+    case ClickTheirs(id) => check(_.rightPlayer(user))(_.attack(id))
     case "end-turn" => this.copy(game = game.endTurn(user))
     case "ai-turn" => check(_.isAITurn)(_.playThisAITurn)
     case "skip-turn" => check(_.thisTurnIsOut)(_.skipTurn)
@@ -50,7 +50,7 @@ object GameRoomRepository {
 
   def addRoom(roomId: String, room: GameRoom) = rooms = rooms + (roomId -> room)
 
-  def addToRoom(roomId: String, player: Player) =
+  def addToRoom(roomId: String, player: PlayerActor) =
     rooms = rooms.updated(roomId, getRoom(roomId).addParticipant(player))
 
   def getRoom(roomId: String): GameRoom = {
@@ -87,7 +87,7 @@ object WaitingRoomRepository {
     rooms = rooms.filter(_._1 != roomId)
   }
 
-  def addToRoom(roomId: String, player: Player) =
+  def addToRoom(roomId: String, player: PlayerActor) =
     rooms = rooms.updated(roomId, getRoom(roomId).addParticipant(player))
 
   def leaveAllRooms(af: ActorRef) =
