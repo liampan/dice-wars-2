@@ -48,7 +48,10 @@ object GameRoomRepository {
 
   def updateRoom(roomId: String, room: GameRoom) = rooms = rooms.updated(roomId, room)
 
-  def addRoom(roomId: String, room: GameRoom) = rooms = rooms + (roomId -> room)
+  def addRoom(roomId: String, room: GameRoom) = {
+    rooms = rooms + (roomId -> room)
+    room
+  }
 
   def addToRoom(roomId: String, player: PlayerActor) =
     rooms = rooms.updated(roomId, getRoom(roomId).addParticipant(player))
@@ -79,8 +82,9 @@ object WaitingRoomRepository {
 
   def migrateToGameRoom(roomId: String, game: Game) = {
     val waitingRoom = getRoom(roomId)
-    GameRoomRepository.addRoom(roomId, GameRoom(waitingRoom.participants, game))
+    val newRoom = GameRoomRepository.addRoom(roomId, GameRoom(waitingRoom.participants, game))
     removeRoom(roomId)
+    newRoom
   }
 
   def removeRoom(roomId: String) = {

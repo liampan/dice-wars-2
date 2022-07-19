@@ -41,7 +41,8 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
     }
 
     val game = boardGenerator.create(settings, teams)
-    WaitingRoomRepository.migrateToGameRoom(room, game)
+    val newRoom = WaitingRoomRepository.migrateToGameRoom(room, game)
+    newRoom.participants.foreach(_.actor ! "start-game")
     Redirect(routes.GameController.game())
   }
 

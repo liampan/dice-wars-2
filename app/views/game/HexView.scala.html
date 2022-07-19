@@ -59,16 +59,18 @@ val bCss = Map(
 @territoryClasses(team: Player, territory: Territory) = @{
     Seq(
         Some("cursorPoint"),
-        Some("borderParent").filter(_ => territory.belongsTo(team) || team.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory))),
+        Some("borderParent").filter(_ => game.rightPlayer(userId) && (territory.belongsTo(team) || team.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory)))),
         Some("clickedTerritory").filter(_ => team.clickedTerritoryId.contains(territory.id))
     ).collect{case Some(clazz) => clazz}.mkString(" ")
 }
 
 @territoryClassesOnClick(team: Player, territory: Territory) = @{
-    if(territory.belongsTo(team)) {
-        s"sendMessage('click-mine-${territory.id}')"
-    } else if (team.clickedTerritoryId.isDefined && team.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory))){
-        s"sendMessage('click-theirs-${territory.id}')"
+    if(game.rightPlayer(userId)){
+        if(territory.belongsTo(team)) {
+            s"sendMessage('click-mine-${territory.id}')"
+        } else if (team.clickedTerritoryId.isDefined && team.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory))){
+            s"sendMessage('click-theirs-${territory.id}')"
+        } else "null"
     } else "null"
 }
 
@@ -97,7 +99,7 @@ val bCss = Map(
                     </div>
                 }
 
-            @if(game.rightPlayer(userId)) {
+            @if(game.rightPlayer(userId) && !gameOver) {
                 <button onclick="sendMessage('end-turn')">
                     End turn
                 </button>

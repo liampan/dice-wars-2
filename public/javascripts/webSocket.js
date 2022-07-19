@@ -1,4 +1,6 @@
 let wsUrl = "/" + document.getElementById("ws-js").getAttribute("location")
+let gameUrl = document.getElementById("ws-js").getAttribute("gameUrl")
+
 var webSocketRetryDelay = 5;
 
 var socket;
@@ -27,6 +29,10 @@ function sendMessage(msg) {
 
 function onMessage(evt) {
     var received_msg = evt.data;
+    if (received_msg == 'start-game') setTimeout(function() {
+        window.location.replace(gameUrl);
+    }, 500);
+
     document.getElementById('screen').innerHTML = received_msg;
 //    document.querySelector('[autofocus]').focus()
 }
