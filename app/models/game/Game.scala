@@ -43,13 +43,16 @@ case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Team]
 
   //todo actually resolve dice
   def attack(userId: String, territoryId: String): Game = {
-    val enemyTerritory = boardState.find(_.id == territoryId).getOrElse(throw new Exception("Territory is missing"))
-    val updated = enemyTerritory.copy(team = thisTurn.number)
-    val player = thisTurn.asInstanceOf[PlayerTeam].copy(clickedTerritoryId = None)
-    copy(
-      boardState = boardState.updated(boardState.indexOf(enemyTerritory), updated),
-      teams = teams.updated(teams.indexOf(thisTurn), player)
-    )
+    val ownTerritory = boardState.find(_.id == thisTurn.clickedTerritoryId.getOrElse(throw new Exception(""))).getOrElse(throw new Exception("Enemy Territory is missing"))
+    val enemyTerritory = boardState.find(_.id == territoryId).getOrElse(throw new Exception("Enemy Territory is missing"))
+     if (ownTerritory.attackable(Set(enemyTerritory)).contains(enemyTerritory)) {
+       val updated = enemyTerritory.copy(team = thisTurn.number)
+       val player = thisTurn.asInstanceOf[PlayerTeam].copy(clickedTerritoryId = None)
+       copy(
+         boardState = boardState.updated(boardState.indexOf(enemyTerritory), updated),
+         teams = teams.updated(teams.indexOf(thisTurn), player)
+       )
+     } else throw new Exception("trying to attack a non attack able territory")
   }
 
   def thisTurn = teams.find((turn%settings.numberOfTeams)+1 == _.number).getOrElse(throw new Exception("Team is missing"))
