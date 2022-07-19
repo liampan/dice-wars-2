@@ -17,7 +17,7 @@ class GameRoomSocketActor(out: ActorRef, user: String, roomId: String) extends A
   override def receive = {
     case msg: String =>
       val room: GameRoom = handleMsg(roomId, user, msg)
-      room.participants.foreach(_.actor ! HexView(room.game).toString)
+      room.participants.foreach(_.actor ! HexView(room.game, user).toString)
       if (room.game.thisTurnIsOut) receive("skip-turn") else ()
       if (room.game.isAITurn) receive("ai-turn") else ()
   }
@@ -25,6 +25,6 @@ class GameRoomSocketActor(out: ActorRef, user: String, roomId: String) extends A
   override def postStop(): Unit = {
     super.postStop()
     val room = handleMsg(roomId, user, s"$user has left")
-    room.participants.foreach(_.actor ! HexView(room.game).toString)
+    room.participants.foreach(_.actor ! HexView(room.game, user).toString)
   }
 }

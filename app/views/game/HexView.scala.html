@@ -1,6 +1,6 @@
 @import models.game._
 
-@(game: Game)
+@(game: Game, userId: String)
 
 @stroke(borders: Seq[Int], color: String)= @{
 
@@ -78,9 +78,11 @@ val bCss = Map(
                     </div>
                 }
 
-            <button onclick="sendMessage('end-turn')">
-                End turn
-            </button>
+            @if(game.thisTurn.userId == userId) {
+                <button onclick="sendMessage('end-turn')">
+                    End turn
+                </button>
+            }
     </div>
 </div>
 
