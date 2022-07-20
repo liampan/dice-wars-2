@@ -5,13 +5,24 @@ import controllers.PlayerActor
 import models.game.Game
 import repositories.GameRoomRepository.{getRoom, updateRoom}
 import views.html.game.HexView
+import views.html.messenger
 
 import scala.util.matching.Regex
 
 //todo give participants names?
-case class WaitingRoom(participants: Set[PlayerActor]){
+case class WaitingRoom(roomId: String, participants: Set[PlayerActor], log: Seq[String] = Seq.empty){
   def addParticipant(p: PlayerActor) = this.copy(participants = participants + p)
-  def removeParticipant(p: ActorRef) = this.copy(participants.filterNot(_.actor == p))
+  def removeParticipant(p: ActorRef) = this.copy(participants = participants.filterNot(_.actor == p))
+  def addLog(msg: String) = this.copy(log = log :+ msg)
+
+  def handleMsg(user: String, msg: String) = msg match {
+    case _ => execute(_.addLog(user + ": " + msg))
+  }
+
+  private def execute(action: WaitingRoom => WaitingRoom): Unit = {
+    val r = WaitingRoomRepository.updateRoom(roomId, action(this))
+    r.participants.foreach(_.actor ! messenger(r.log).toString())
+  }
 }
 
 
@@ -39,11 +50,6 @@ case class GameRoom(roomId: String, participants: Set[PlayerActor], game: Game) 
     gr.participants.foreach(_.actor ! "get-board")
   }
 }
-
-object WaitingRoom {
-  def empty: WaitingRoom = WaitingRoom(Set.empty)
-}
-
 
 object GameRoomRepository {
   private var rooms: Map[String, GameRoom] = Map.empty
@@ -73,14 +79,17 @@ object GameRoomRepository {
 object WaitingRoomRepository {
 
   //room id -> participants
-  private var rooms: Map[String, WaitingRoom] = Map.empty.withDefault(_ => WaitingRoom(Set.empty))
+  private var rooms: Map[String, WaitingRoom] = Map.empty
 
   def getRoom(roomId: String): WaitingRoom = {
     cleanUp
-    rooms.getOrElse(roomId, WaitingRoom.empty)
+    rooms.getOrElse(roomId, WaitingRoom(roomId, Set.empty))
   }
 
-  def updateRoom(roomId: String, room: WaitingRoom) = rooms = rooms.updated(roomId, room)
+  def updateRoom(roomId: String, room: WaitingRoom) = {
+    rooms = rooms.updated(roomId, room)
+    room
+  }
 
   def migrateToGameRoom(roomId: String, game: Game) = {
     val waitingRoom = getRoom(roomId)

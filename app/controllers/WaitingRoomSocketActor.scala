@@ -16,9 +16,7 @@ object WaitingRoomSocketActor {
 class WaitingRoomSocketActor(out: ActorRef, user: String, roomId: String) extends Actor {
 
   override def receive = {
-    case msg =>
-      val room: WaitingRoom = getRoom(roomId)
-      room.participants.foreach(_.actor ! "recivced: " + msg)
+    case msg: String => getRoom(roomId).handleMsg(user, msg)
   }
 
   override def postStop(): Unit = {

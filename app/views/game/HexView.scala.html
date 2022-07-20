@@ -36,8 +36,8 @@ val bCss = Map(
     (notBorders.map(cCss) ++ borders.map(bCss)).mkString("text-shadow: ", ", ", "")
 }
 
-@getColor(team: Int) = @{
-    team match{
+@getColor(player: Int) = @{
+    player match{
         case 1 => "green"
         case 2 => "red"
         case 3 => "orange"
@@ -50,25 +50,25 @@ val bCss = Map(
         case _ => "limegreen"
     }
 }
-@turnClass(isTurn: Boolean, stillIn: Boolean) = @{
+@turnStyle(isTurn: Boolean, stillIn: Boolean) = @{
     if (isTurn) "border-radius: 12px;border: 2px solid green;"
     else if (!stillIn) "text-decoration: line-through;"
     else ""
 }
 
-@territoryClasses(team: Player, territory: Territory) = @{
+@territoryClasses(player: Player, territory: Territory) = @{
     Seq(
         Some("cursorPoint"),
-        Some("borderParent").filter(_ => game.rightPlayer(userId) && (territory.belongsTo(team) || team.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory)))),
-        Some("clickedTerritory").filter(_ => team.clickedTerritoryId.contains(territory.id))
+        Some("borderParent").filter(_ => game.rightPlayer(userId) && (territory.belongsTo(player) || player.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory)))),
+        Some("clickedTerritory").filter(_ => player.clickedTerritoryId.contains(territory.id))
     ).collect{case Some(clazz) => clazz}.mkString(" ")
 }
 
-@territoryClassesOnClick(team: Player, territory: Territory) = @{
+@territoryClassesOnClick(player: Player, territory: Territory) = @{
     if(game.rightPlayer(userId)){
-        if(territory.belongsTo(team)) {
+        if(territory.belongsTo(player)) {
             s"sendMessage('click-mine-${territory.id}')"
-        } else if (team.clickedTerritoryId.isDefined && team.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory))){
+        } else if (player.clickedTerritoryId.isDefined && player.clickedTerritoryId.flatMap(game.getTerritoryById).exists(_.attackable(game.boardState.toSet).contains(territory))){
             s"sendMessage('click-theirs-${territory.id}')"
         } else "null"
     } else "null"
@@ -78,34 +78,43 @@ val bCss = Map(
     <h1>GAME OVER</h1>
 }
 <div style="overflow: hidden;">
-    <div class="aztec" style="border: solid red 2px;width: 58.5vw;height: 41.5vw;position: relative;float:left;">
+    <div class="boardWrapper aztec">
         @game.boardState.map{ territory =>
-            <span class="@territoryClasses(game.thisTurn, territory)" style="color: @{getColor(territory.team)}" onclick="@territoryClassesOnClick(game.thisTurn, territory)">
+            <span class="@territoryClasses(game.thisTurn, territory)" style="color: @{getColor(territory.player)}" onclick="@territoryClassesOnClick(game.thisTurn, territory)">
                 @territory.hexes.map{ hex: Hex =>
-                    <div class="borderChild" style="top:@{hex.topPx}vw;left:@{hex.leftPx}vw;position: absolute; font-size:3vw;padding-left:0.5vw;@stroke(hex.needsBorder(territory.hexes), getColor(territory.team));">
+                    <div class="borderChild" style="top:@{hex.topPx}vw;left:@{hex.leftPx}vw;position: absolute; font-size:3vw;padding-left:0.5vw;@stroke(hex.needsBorder(territory.hexes), getColor(territory.player));">
                         &#x2B22;
                     </div>
                 }
             </span>
         }
     </div>
-    <div style="border: solid blue 2px;width: 20vw;height: 41.5vw;position: relative;float:left;">
-            <p>@userId</p>
-            <p>Your turn: @game.rightPlayer(userId)</p>
-            <p>Turn: @{game.turn}</p>
+    <div class="infoTabWrapper">
+            <div style="width:100%;display: table;">
+                    <span style="display: table-cell;text-align: center;color:grey">@userId</span>
+                    <span style="display: table-cell;text-align: center;color:grey">Turn: @{game.turn}</span>
+            </div>
+            <div style="height: 2em;width:100%;">
+                @if(game.rightPlayer(userId)){It's your turn!}
+            </div>
 
-                @game.turnStatus.map{ case (team, isTurn, stillIn) =>
-                    <div style="width: 50%;@turnClass(isTurn, stillIn)">
-                        <span style="padding-left:1vw;color: @{getColor(team.number)}">&#x2B22;</span>
-                        <span style="padding-left:1vw;">team: @team.number</span>
+                @game.turnStatus.map{ case (player, isTurn, stillIn, largestUnitedTerritoryCount) =>
+                    <div style="width: 70%;@turnStyle(isTurn, stillIn);display: table;">
+                        <span style="padding-left:1vw;color: @{getColor(player.number)};display: table-cell">&#x2B22;</span>
+                        <span style="padding-left:1vw;max-width:30%;display: table-cell;">player: @player.number</span>
+                        <span style="padding-left:1vw;display: table-cell;">@largestUnitedTerritoryCount</span>
                     </div>
                 }
 
-            @if(game.rightPlayer(userId) && !gameOver) {
-                <button onclick="sendMessage('end-turn')">
-                    End turn
-                </button>
-            }
+            <div id="button-box" style="width:16vw; height:3vw;margin: 0 auto;padding: 10px;position: relative;">
+                @if(game.rightPlayer(userId) && !gameOver) {
+                    <p>1. Click your area. 2. Click neighbor to attack</p>
+
+                    <div class="endTurn" onclick="sendMessage('end-turn')">
+                        End turn
+                    </div>
+                }
+            </div>
     </div>
 </div>
 

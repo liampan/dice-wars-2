@@ -33,15 +33,15 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
     val participants = WaitingRoomRepository.getRoom(room)
       .participants
 
-    val teams = Range.inclusive(1, settings.numberOfTeams).map{teamNumber =>
+    val players = Range.inclusive(1, settings.numberOfPlayers).map{playerNumber =>
       participants
         .toSeq
         .zipWithIndex
-        .find(_._2+1 == teamNumber)
-        .fold[Player](AI(teamNumber))(player => Human(player._1.userId, teamNumber))
+        .find(_._2+1 == playerNumber)
+        .fold[Player](AI(playerNumber))(player => Human(player._1.userId, playerNumber))
     }
 
-    val game = boardGenerator.create(settings, teams)
+    val game = boardGenerator.create(settings, players)
     val newRoom = WaitingRoomRepository.migrateToGameRoom(room, game)
     newRoom.participants.foreach(_.actor ! "start-game")
     

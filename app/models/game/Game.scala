@@ -1,11 +1,12 @@
 package models.game
 
 import java.util.UUID
+import scala.util.Random
 
 case class Settings(
                    numberOfRows: Int,
                    numberOfColumns: Int,
-                   numberOfTeams: Int,
+                   numberOfPlayers: Int,
                    minTerritorySize: Int,
                    maxTerritorySize: Int
                    )
@@ -31,7 +32,7 @@ case class AI(number: Int) extends Player {
   //todo how does AI play?
   def playTurn(game: Game): Game = {
     Thread.sleep(700)
-    val ownTerritory = game.boardState.filter(_.team == number).head
+    val ownTerritory = game.boardState.filter(_.player == number).head
     ownTerritory.attackable(game.boardState.toSet)
       .headOption
       .map(attackble =>
@@ -43,7 +44,7 @@ case class AI(number: Int) extends Player {
 }
 
 
-case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Player], turn: Int = 0) { //skip turn if player is out
+case class Game(settings: Settings, boardState: Seq[Territory], players: Seq[Player], turn: Int = 0) { //skip turn if player is out
 
   def getTerritoryById(id: String): Option[Territory] = boardState.find(_.id == id)
 
@@ -51,7 +52,7 @@ case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Playe
 
   def clickMine(territoryId: String): Game = {
     val updated = thisTurn.asInstanceOf[Human].copy(clickedTerritoryId = Some(territoryId))
-    copy(teams = teams.updated(teams.indexOf(thisTurn), updated))
+    copy(players = players.updated(players.indexOf(thisTurn), updated))
   }
 
   def attack(enemyTerritoryId: String): Game = {
@@ -64,33 +65,37 @@ case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Playe
     val ownTerritory = boardState.find(_.id == friendlyTerritoryId).getOrElse(throw new Exception("Friendly Territory is missing"))
     val enemyTerritory = boardState.find(_.id == enemyTerritoryId).getOrElse(throw new Exception("Enemy Territory is missing"))
      if (ownTerritory.attackable(Set(enemyTerritory)).contains(enemyTerritory)) {
-       val updated = enemyTerritory.copy(team = thisTurn.number)
+       val updated = enemyTerritory.copy(player = thisTurn.number)
        val player = thisTurn.noClick
        copy(
          boardState = boardState.updated(boardState.indexOf(enemyTerritory), updated),
-         teams = teams.updated(teams.indexOf(thisTurn), player)
+         players = players.updated(players.indexOf(thisTurn), player)
        )
      } else throw new Exception("trying to attack a non attack able territory")
   }
 
-  def thisTurn: Player = teams.find((turn%settings.numberOfTeams)+1 == _.number).getOrElse(throw new Exception("Team is missing"))
+  def thisTurn: Player = players.find((turn%settings.numberOfPlayers)+1 == _.number).getOrElse(throw new Exception("Player is missing"))
 
-  //(team, isTurn, stillIn)
-  def turnStatus: Seq[(Player, Boolean, Boolean)] = teams.map{
-    team => (team, (turn%settings.numberOfTeams)+1 == team.number, teamIsStillInPlay(team))
+  //(player, isTurn, stillIn, largestUnitedTerritoryCount)
+  def turnStatus: Seq[(Player, Boolean, Boolean, Int)] = players.map{
+    player =>
+      val isTurn = (turn%settings.numberOfPlayers)+1 == player.number
+      val stillPlaying = playerIsStillInPlay(player)
+      val largestUnitedTerritoryCount = Random.nextInt(15) //todo calculate this, its also required for dice allocation
+      (player, isTurn, stillPlaying, largestUnitedTerritoryCount)
   }
 
-  def teamIsStillInPlay(team: Player) =
-    boardState.exists(_.team == team.number)
+  def playerIsStillInPlay(player: Player) =
+    boardState.exists(_.player == player.number)
 
   def humanPlayersLeft: Boolean =
-    teams.filter(_.isInstanceOf[Human]).exists(teamIsStillInPlay)
+    players.filter(_.isInstanceOf[Human]).exists(playerIsStillInPlay)
 
   def gameComplete: Boolean =
-    boardState.map(_.team).distinct.size == 1
+    boardState.map(_.player).distinct.size == 1
 
   def isAITurn: Boolean = thisTurn.isAI
-  def thisTurnIsOut = !teamIsStillInPlay(thisTurn)
+  def thisTurnIsOut = !playerIsStillInPlay(thisTurn)
 
 
   def playThisAITurn =

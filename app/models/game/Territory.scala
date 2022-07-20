@@ -2,9 +2,9 @@ package models.game
 
 import java.util.UUID
 
-final case class Territory(hexes: Set[Hex], team: Int, id: String = UUID.randomUUID().toString) {
+final case class Territory(hexes: Set[Hex], player: Int, id: String = UUID.randomUUID().toString) {
 
-  def belongsTo(t: Player): Boolean = t.number == team
+  def belongsTo(p: Player): Boolean = p.number == player
 
   private val row = hexes.toSeq.map(_.row).groupBy(i => i).mapValues(_.size).maxBy(_._2)._1
   private val column = hexes.toSeq.map(_.column).groupBy(i => i).mapValues(_.size).maxBy(_._2)._1
@@ -23,7 +23,7 @@ final case class Territory(hexes: Set[Hex], team: Int, id: String = UUID.randomU
     allTerritories.filter(isTouching)
 
   def attackable(allTerritories: Set[Territory]): Set[Territory] =
-    neighbors(allTerritories).filter(_.team != team)
+    neighbors(allTerritories).filter(_.player != player)
 
   def addHex(hex: Hex): Territory =
     copy(hexes = hexes + hex)

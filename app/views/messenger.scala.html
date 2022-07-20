@@ -1,7 +1,7 @@
 
 @(messages: Seq[String])
-<div style="display:flex; flex-direction: column; min-height: 250px;">
-    <div style="max-height: 230px; overflow: scroll; display: flex; flex-direction: column-reverse;">
+<div style="display:flex; flex-direction: column; min-height: 250px; width:29vw;margin:1vw;border: 1px black solid;">
+    <div style="max-height: 230px; overflow: auto; display: flex; flex-direction: column-reverse;">
         <div style="flex-direction: column-reverse;">
         @messages.map { msg =>
           <p>@msg</p>
@@ -11,9 +11,8 @@
 
     <div style="margin-top: auto;">
         <form onsubmit="sendMessage(msg.value)" action="javascript:void(0);" >
-            <input autofocus="autofocus" onfocus="this.select()" id="msginput" type="text" name="msg">
-            <button type="submit">send</button>
+            <input placeholder="talk to other players" autofocus="autofocus" onfocus="this.select()" id="msginput" type="text" name="msg" style="width:20vw">
+            <button style="width:8vw" type="submit">send</button>
         </form>
     </div>
 </div>
-

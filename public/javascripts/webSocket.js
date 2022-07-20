@@ -36,7 +36,7 @@ function onMessage(evt) {
     if (received_msg == 'get-board') sendMessage(received_msg)
     else {
         document.getElementById('screen').innerHTML = received_msg;
-//    document.querySelector('[autofocus]').focus()
+        document.querySelector('[autofocus]').focus()
     }
 }
 

@@ -47,7 +47,7 @@ class BoardGenerator @Inject()(random: ScalaRandom = ScalaRandom) {
     val territories: Seq[Territory] = gen(initHexes.toSet, Seq.empty, 0)
       .filter(_.size >= settings.minTerritorySize)
       .zipWithIndex
-      .map{case (hexes, i) => Territory(hexes, (i%settings.numberOfTeams)+1)}
+      .map{case (hexes, i) => Territory(hexes, (i%settings.numberOfPlayers)+1)}
 
     validateTerritories(territories).getOrElse(generateTerritories(settings))
   }
@@ -66,10 +66,10 @@ class BoardGenerator @Inject()(random: ScalaRandom = ScalaRandom) {
     Some(territory).filter(_ => checkNeighbors(Seq(territory.head), territory.tail))
   }
 
-  def create(settings: Settings, teams: Seq[Player]): Game = {
+  def create(settings: Settings, players: Seq[Player]): Game = {
     val territories = generateTerritories(settings)
 
-    Game(settings = settings, boardState = territories, teams = teams)
+    Game(settings = settings, boardState = territories, players = players)
   }
 
 }
