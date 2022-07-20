@@ -15,6 +15,9 @@ object GameRoomSocketActor {
 class GameRoomSocketActor(out: ActorRef, user: String, roomId: String) extends Actor {
 
   override def receive = {
+    case "get-board" =>
+      val room: GameRoom = getRoom(roomId)
+      room.participants.foreach(_.actor ! HexView(room.game, user).toString)
     case msg: String =>
       val room: GameRoom = handleMsg(roomId, user, msg)
       room.participants.foreach(_.actor ! "get-board")
@@ -24,9 +27,6 @@ class GameRoomSocketActor(out: ActorRef, user: String, roomId: String) extends A
       } else {
         room.participants.foreach(_.actor ! HexView(room.game, user, gameOver = true).toString)
       }
-    case "get-board" =>
-      val room: GameRoom = getRoom(roomId)
-      room.participants.find(_.userId == user).foreach(_.actor ! HexView(room.game, user).toString)
   }
 
   override def postStop(): Unit = {
