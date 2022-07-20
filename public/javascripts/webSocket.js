@@ -33,8 +33,11 @@ function onMessage(evt) {
         window.location.replace(gameUrl);
     }, 500);
 
-    document.getElementById('screen').innerHTML = received_msg;
+    if (received_msg == 'get-board') sendMessage(received_msg)
+    else {
+        document.getElementById('screen').innerHTML = received_msg;
 //    document.querySelector('[autofocus]').focus()
+    }
 }
 
 
