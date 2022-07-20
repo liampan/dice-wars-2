@@ -18,18 +18,16 @@ class GameRoomSocketActor(out: ActorRef, user: String, roomId: String) extends A
     case "get-board" =>
       val room: GameRoom = getRoom(roomId)
       room.participants.foreach(_.actor ! HexView(room.game, user, room.game.gameComplete).toString)
-    case msg: String =>
-      val room: GameRoom = handleMsg(roomId, user, msg)
-      room.participants.foreach(_.actor ! "get-board")
       if (room.game.humanPlayersLeft) {
         if (room.game.thisTurnIsOut) receive("skip-turn")
         if (room.game.isAITurn) receive("ai-turn")
       }
+    case msg: String => handleMsg(roomId, user, msg)
   }
 
   override def postStop(): Unit = {
     super.postStop()
-    val room = handleMsg(roomId, user, s"$user has left")
+    val room = getRoom(roomId)
     room.participants.foreach(_.actor ! "get-board")
   }
 }

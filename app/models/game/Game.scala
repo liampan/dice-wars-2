@@ -38,7 +38,7 @@ case class AI(number: Int) extends Player {
         game.attack(ownTerritory.id, attackble.id)
     )
       .getOrElse(game)
-      .endTurn(userId)
+      .endTurn
   }
 }
 
@@ -49,7 +49,7 @@ case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Playe
 
   def rightPlayer(userId: String): Boolean = thisTurn.userId.toUpperCase == userId.toUpperCase
 
-  def clickMine(userId: String, territoryId: String): Game = {
+  def clickMine(territoryId: String): Game = {
     val updated = thisTurn.asInstanceOf[Human].copy(clickedTerritoryId = Some(territoryId))
     copy(teams = teams.updated(teams.indexOf(thisTurn), updated))
   }
@@ -98,10 +98,7 @@ case class Game(settings: Settings, boardState: Seq[Territory], teams: Seq[Playe
 
   //todo
   // - distribute dice
-  def endTurn(userId: String): Game =
-    if (rightPlayer(userId)) this.copy(turn = turn + 1)
-    else this //this person should not have sent end turn.
-
+  def endTurn: Game = this.copy(turn = turn + 1)
 
   def skipTurn: Game = if(thisTurnIsOut) this.copy(turn = turn + 1) else this
 

@@ -3,6 +3,8 @@ package repositories
 import akka.actor.ActorRef
 import controllers.PlayerActor
 import models.game.Game
+import repositories.GameRoomRepository.{getRoom, updateRoom}
+import views.html.game.HexView
 
 import scala.util.matching.Regex
 
@@ -10,12 +12,10 @@ import scala.util.matching.Regex
 case class WaitingRoom(participants: Set[PlayerActor]){
   def addParticipant(p: PlayerActor) = this.copy(participants = participants + p)
   def removeParticipant(p: ActorRef) = this.copy(participants.filterNot(_.actor == p))
-
-  def startGame(game: Game): GameRoom = GameRoom(participants, game)
 }
 
 
-case class GameRoom(participants: Set[PlayerActor], game: Game) {
+case class GameRoom(roomId: String, participants: Set[PlayerActor], game: Game) {
   def addParticipant(p: PlayerActor) = this.copy(participants = participants + p)
 
   //create a commands object that creates regex
@@ -23,16 +23,21 @@ case class GameRoom(participants: Set[PlayerActor], game: Game) {
   private val ClickTheirs: Regex = "click-theirs-(.*)".r
 
   def handleMsg(user: String, msg: String): GameRoom = msg match {
-    case ClickMine(id) => check(_.rightPlayer(user))(_.clickMine(user, id))
-    case ClickTheirs(id) => check(_.rightPlayer(user))(_.attack(id))
-    case "end-turn" => this.copy(game = game.endTurn(user))
-    case "ai-turn" => check(_.isAITurn)(_.playThisAITurn)
-    case "skip-turn" => check(_.thisTurnIsOut)(_.skipTurn)
-    case _ => this
+    case ClickMine(id) => execute(_.rightPlayer(user))(_.clickMine(id))
+    case ClickTheirs(id) => execute(_.rightPlayer(user))(_.attack(id))
+    case "end-turn" => execute(_.rightPlayer(user))(_.endTurn)
+    case "ai-turn" => execute(_.isAITurn)(_.playThisAITurn)
+    case "skip-turn" => execute(_.thisTurnIsOut)(_.skipTurn)
+    case _ => doNothing
   }
 
-  private def check(f: Game => Boolean)(g: Game => Game) =
-    if (f(game)) this.copy(game = g(game)) else this
+  private val doNothing: GameRoom = execute(_ => false)(identity)
+  private def execute(predicate: Game => Boolean)(action: Game => Game): GameRoom = {
+    val gr = if (predicate(game)) this.copy(game = action(game)) else this
+    updateRoom(roomId, gr)
+    gr.participants.foreach(_.actor ! "get-board")
+    gr
+  }
 }
 
 object WaitingRoom {
@@ -48,8 +53,8 @@ object GameRoomRepository {
 
   def updateRoom(roomId: String, room: GameRoom) = rooms = rooms.updated(roomId, room)
 
-  def addRoom(roomId: String, room: GameRoom) = {
-    rooms = rooms + (roomId -> room)
+  def addRoom(room: GameRoom) = {
+    rooms = rooms + (room.roomId -> room)
     room
   }
 
@@ -61,11 +66,8 @@ object GameRoomRepository {
     rooms.getOrElse(roomId, throw new IllegalArgumentException(s"room: '$roomId' does not exist"))
   }
 
-  def handleMsg(roomId: String, user: String, msg: String) = {
-    val room = getRoom(roomId).handleMsg(user, msg)
-    updateRoom(roomId, room)
-    room
-  }
+  def handleMsg(roomId: String, user: String, msg: String) =
+    getRoom(roomId).handleMsg(user, msg)
 }
 
 object WaitingRoomRepository {
@@ -82,7 +84,7 @@ object WaitingRoomRepository {
 
   def migrateToGameRoom(roomId: String, game: Game) = {
     val waitingRoom = getRoom(roomId)
-    val newRoom = GameRoomRepository.addRoom(roomId, GameRoom(waitingRoom.participants, game))
+    val newRoom = GameRoomRepository.addRoom(GameRoom(roomId, waitingRoom.participants, game))
     removeRoom(roomId)
     newRoom
   }
