@@ -14,10 +14,10 @@ object GameRoomSocketActor {
 
 class GameRoomSocketActor(out: ActorRef, user: String, roomId: String) extends Actor {
 
-  override def receive = {
+  override def receive: Receive = {
     case "get-board" =>
       val room: GameRoom = getRoom(roomId)
-      room.participants.foreach(_.actor ! HexView(room.game, user, room.game.gameComplete).toString)
+      room.participants.foreach(player => player.actor ! HexView(room.game, player.userId, room.game.gameComplete).toString)
       if (room.game.humanPlayersLeft) {
         if (room.game.thisTurnIsOut) receive("skip-turn")
         if (room.game.isAITurn) receive("ai-turn")

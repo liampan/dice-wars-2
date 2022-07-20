@@ -22,21 +22,21 @@ case class GameRoom(roomId: String, participants: Set[PlayerActor], game: Game) 
   private val ClickMine: Regex = "click-mine-(.*)".r
   private val ClickTheirs: Regex = "click-theirs-(.*)".r
 
-  def handleMsg(user: String, msg: String): GameRoom = msg match {
+  def handleMsg(user: String, msg: String): Unit = msg match {
     case ClickMine(id) => execute(_.rightPlayer(user))(_.clickMine(id))
     case ClickTheirs(id) => execute(_.rightPlayer(user))(_.attack(id))
     case "end-turn" => execute(_.rightPlayer(user))(_.endTurn)
     case "ai-turn" => execute(_.isAITurn)(_.playThisAITurn)
     case "skip-turn" => execute(_.thisTurnIsOut)(_.skipTurn)
-    case _ => doNothing
+    case _ => doNothing()
   }
 
-  private val doNothing: GameRoom = execute(_ => false)(identity)
-  private def execute(predicate: Game => Boolean)(action: Game => Game): GameRoom = {
+  private def doNothing(): Unit = execute(_ => false)(identity)
+
+  private def execute(predicate: Game => Boolean)(action: Game => Game): Unit = {
     val gr = if (predicate(game)) this.copy(game = action(game)) else this
     updateRoom(roomId, gr)
     gr.participants.foreach(_.actor ! "get-board")
-    gr
   }
 }
 
