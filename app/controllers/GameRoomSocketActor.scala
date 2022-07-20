@@ -17,15 +17,13 @@ class GameRoomSocketActor(out: ActorRef, user: String, roomId: String) extends A
   override def receive = {
     case "get-board" =>
       val room: GameRoom = getRoom(roomId)
-      room.participants.foreach(_.actor ! HexView(room.game, user).toString)
+      room.participants.foreach(_.actor ! HexView(room.game, user, room.game.gameComplete).toString)
     case msg: String =>
       val room: GameRoom = handleMsg(roomId, user, msg)
       room.participants.foreach(_.actor ! "get-board")
-      if (room.game.humanPlayersLeft && !room.game.gameComplete) {
+      if (room.game.humanPlayersLeft) {
         if (room.game.thisTurnIsOut) receive("skip-turn")
         if (room.game.isAITurn) receive("ai-turn")
-      } else {
-        room.participants.foreach(_.actor ! HexView(room.game, user, gameOver = true).toString)
       }
   }
 
