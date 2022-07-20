@@ -21,6 +21,7 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
                                boardGenerator: BoardGenerator
                               )(implicit system: ActorSystem, mat: Materializer) extends AbstractController(cc) {
 
+  //join/:room
   def waitingRoom(room: String): Action[AnyContent] = userAction {
     request =>
       Ok(waitingRoomView(room)).addingToSession(userIdKey -> request.userName, roomKey -> room)(request)
@@ -43,6 +44,7 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
     val game = boardGenerator.create(settings, teams)
     val newRoom = WaitingRoomRepository.migrateToGameRoom(room, game)
     newRoom.participants.foreach(_.actor ! "start-game")
+    
     Redirect(routes.GameController.game())
   }
 

@@ -90,6 +90,8 @@ val bCss = Map(
         }
     </div>
     <div style="border: solid blue 2px;width: 20vw;height: 41.5vw;position: relative;float:left;">
+            <p>@userId</p>
+            <p>Your turn: @game.rightPlayer(userId)</p>
             <p>Turn: @{game.turn}</p>
 
                 @game.turnStatus.map{ case (team, isTurn, stillIn) =>
