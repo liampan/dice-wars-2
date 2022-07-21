@@ -1,6 +1,7 @@
 package models.game
 
 import java.util.UUID
+import scala.annotation.tailrec
 import scala.util.Random
 
 case class Settings(
@@ -76,12 +77,26 @@ case class Game(settings: Settings, boardState: Seq[Territory], players: Seq[Pla
 
   def thisTurn: Player = players.find((turn%settings.numberOfPlayers)+1 == _.number).getOrElse(throw new Exception("Player is missing"))
 
+  def largestUnitedTerritory(player: Player) = {
+    val allPlayerTerritories = boardState.filter(_.player == player.number)
+
+    val groupedNeighbors = allPlayerTerritories.map(t =>
+        allPlayerTerritories.filter(j => t.neighbors(allPlayerTerritories.toSet).contains(j)) :+ t
+      )
+
+    val map = allPlayerTerritories.map(t =>
+      groupedNeighbors.filter(_.contains(t)).maxBy(_.size)
+    ).distinct.groupBy(_.length)
+
+    map.maxBy(_._1)._2.maxBy(_.size)
+  }
+
   //(player, isTurn, stillIn, largestUnitedTerritoryCount)
   def turnStatus: Seq[(Player, Boolean, Boolean, Int)] = players.map{
     player =>
       val isTurn = (turn%settings.numberOfPlayers)+1 == player.number
       val stillPlaying = playerIsStillInPlay(player)
-      val largestUnitedTerritoryCount = Random.nextInt(15) //todo calculate this, its also required for dice allocation
+      val largestUnitedTerritoryCount = largestUnitedTerritory(player).size
       (player, isTurn, stillPlaying, largestUnitedTerritoryCount)
   }
 
