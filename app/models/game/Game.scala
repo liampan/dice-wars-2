@@ -126,7 +126,6 @@ case class Game(settings: Settings, boardState: Seq[Territory], players: Seq[Pla
     val dice: Int = largestUnitedTerritory(thisTurn).size
     val playerTerritories: Seq[Territory] = boardState.filter(_.player == thisTurn.number)
 
-    @tailrec
     def adder(territories: Seq[Territory], dice: Int): Seq[Territory] = {
       val dicePool = BoardGenerator.splitDice(playerTerritories.length, dice)
       val a: Seq[(Territory, Int)] = territories.zip(dicePool).map{
@@ -137,7 +136,7 @@ case class Game(settings: Settings, boardState: Seq[Territory], players: Seq[Pla
       val t = a.map(_._1)
       val d = a.map(_._2)
       if (d.sum == 0 || t.forall(_.diceCount == 8)) t
-      else adder(t, d.sum)
+      else t ++ adder(t.filterNot(_.diceCount == 8), d.sum)
     }
 
     this.copy(
