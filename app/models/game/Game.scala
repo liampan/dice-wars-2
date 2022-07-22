@@ -25,6 +25,7 @@ case class Human(userId: String, number: Int, clickedTerritoryId: Option[String]
   override def noClick: Player = this.copy(clickedTerritoryId = None)
 }
 
+//basic Ai attacks once per go.
 case class AI(number: Int) extends Player {
   override val clickedTerritoryId: Option[String] = None
   override val isAI: Boolean = true
@@ -34,12 +35,15 @@ case class AI(number: Int) extends Player {
   //todo how does AI play?
   def playTurn(game: Game): Game = {
     Thread.sleep(700)
-    val ownTerritory = game.boardState.filter(_.player == number).head
-    ownTerritory.attackable(game.boardState.toSet)
-      .headOption
-      .map(attackble =>
-        game.attack(ownTerritory.id, attackble.id)
-    )
+    game
+      .boardState
+      .find(t => t.player == number && t.diceCount > 1)
+      .flatMap(ownTerritory =>
+        ownTerritory.attackable(game.boardState.toSet)
+        .headOption
+        .map(attackble =>
+          game.attack(ownTerritory.id, attackble.id)
+      ))
       .getOrElse(game)
       .endTurn
   }
@@ -66,7 +70,7 @@ case class Game(settings: Settings, boardState: Seq[Territory], players: Seq[Pla
   def attack(friendlyTerritoryId: String, enemyTerritoryId: String): Game = {
     val ownTerritory = boardState.find(_.id == friendlyTerritoryId).getOrElse(throw new Exception("Friendly Territory is missing"))
     val enemyTerritory = boardState.find(_.id == enemyTerritoryId).getOrElse(throw new Exception("Enemy Territory is missing"))
-     if (ownTerritory.attackable(Set(enemyTerritory)).contains(enemyTerritory)) {
+     if (ownTerritory.attackable(Set(enemyTerritory)).contains(enemyTerritory) && ownTerritory.diceCount > 1) {
        val updatedFriendly = ownTerritory.postAttack
        val updatedEnemy = if (ownTerritory.beats(enemyTerritory)) enemyTerritory.copy(player = thisTurn.number, diceCount = ownTerritory.diceCount -1) else enemyTerritory
        val player = thisTurn.noClick

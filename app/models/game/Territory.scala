@@ -1,6 +1,7 @@
 package models.game
 
 import java.util.UUID
+import scala.util.Random
 
 final case class Territory(hexes: Set[Hex], player: Int, diceCount: Int, id: String = UUID.randomUUID().toString) {
 
@@ -9,7 +10,8 @@ final case class Territory(hexes: Set[Hex], player: Int, diceCount: Int, id: Str
   def postAttack: Territory = this.copy(diceCount = 1)
 
   def beats(other: Territory): Boolean = {
-    diceCount > other.diceCount //todo actually roll dice. show this?
+    //todo actually roll dice. show this?
+    Seq.fill(diceCount)(Random.nextInt(5)+1).sum > Seq.fill(other.diceCount)(Random.nextInt(5)+1).sum
   }
 
   def centreMosthex = hexes.maxBy(_.confirmedNeighbors(hexes).size)
