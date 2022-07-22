@@ -30,6 +30,7 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
   //this should be a post, from the start screen maybe?
   def startGame(room: String): Action[AnyContent] = userAction {
     val settings = Settings(23, 30, 10, 10, 30)
+    //val settings = Settings(23, 30, 3, 30, 50)
     val participants = WaitingRoomRepository.getRoom(room)
       .participants
 

@@ -2,7 +2,7 @@ package controllers
 
 import akka.actor._
 import repositories.GameRoom
-import repositories.GameRoomRepository.{addToRoom, getRoom, handleMsg}
+import repositories.GameRoomRepository.{addToRoom, getRoom, handleMsg, updateRoom}
 import views.html.game.HexView
 
 object GameRoomSocketActor {
@@ -20,7 +20,7 @@ class GameRoomSocketActor(out: ActorRef, user: String, roomId: String) extends A
       room.participants.foreach(player => player.actor ! HexView(room.game, player.userId, room.game.gameComplete).toString)
       if (room.game.humanPlayersLeft) {
         if (room.game.thisTurnIsOut) receive("skip-turn")
-        if (room.game.isAITurn) receive("ai-turn")
+        else if (room.game.isAITurn) receive("ai-turn")
       }
     case msg: String => handleMsg(roomId, user, msg)
   }

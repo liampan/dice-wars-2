@@ -5,6 +5,8 @@ import scala.util.Random
 
 final case class Territory(hexes: Set[Hex], player: Int, diceCount: Int, id: String = UUID.randomUUID().toString) {
 
+  override def toString: String = s"Territory($player, $diceCount, ${id.takeRight(4)})"
+
   def belongsTo(p: Player): Boolean = p.number == player
 
   def postAttack: Territory = this.copy(diceCount = 1)
@@ -23,7 +25,7 @@ final case class Territory(hexes: Set[Hex], player: Int, diceCount: Int, id: Str
   def potentialNeighbors: Set[Hex] = hexes.flatMap(_.potentialNeighbors) -- hexes
 
   def isTouching(other: Territory): Boolean =
-    other.hexes.exists(potentialNeighbors.contains)
+    other.hexes.intersect(potentialNeighbors).nonEmpty
 
   def neighbors(allTerritories: Set[Territory]): Set[Territory] =
     allTerritories.filter(isTouching)

@@ -6,6 +6,8 @@ import models.game.Game
 import repositories.GameRoomRepository.updateRoom
 import views.html.messenger
 
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.Future
 import scala.util.matching.Regex
 
 //todo give participants names?
@@ -56,7 +58,10 @@ object GameRoomRepository {
   def cleanUp =
     rooms = rooms.filter{case (_, room) => room.participants.nonEmpty }
 
-  def updateRoom(roomId: String, room: GameRoom) = rooms = rooms.updated(roomId, room)
+  private def doUpdate(roomId: String, room: GameRoom): Unit = rooms = rooms.updated(roomId, room)
+
+  def updateRoom(roomId: String, room: GameRoom) =
+    Future.successful(doUpdate(roomId, room))
 
   def addRoom(room: GameRoom) = {
     rooms = rooms + (room.roomId -> room)

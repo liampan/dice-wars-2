@@ -36,7 +36,7 @@ class BoardGenerator @Inject()(random: ScalaRandom = ScalaRandom) {
     splitDice(territoryCount, totalDicePool)
   }
 
-  private def generateTerritories(settings: Settings): Seq[Territory] = {
+  private def generateTerritories(settings: Settings): Set[Territory] = {
     val initHexes: Seq[Hex] = for {
       row <- Range.inclusive(0, settings.numberOfRows)
       column <- Range.inclusive(0, settings.numberOfColumns)
@@ -61,23 +61,24 @@ class BoardGenerator @Inject()(random: ScalaRandom = ScalaRandom) {
 
     val territoryWithDice = territories.flatMap{
       case (_, t) => splitStartDice(averageTerritorySize, t.length).zip(t).map{case (dice, territory) => territory.copy(diceCount = Math.max(1, dice))}
-    }.toSeq
+    }.toSet
 
     validateTerritories(territoryWithDice).getOrElse(generateTerritories(settings))
   }
 
-  def validateTerritories(territory: Seq[Territory]): Option[Seq[Territory]] = {
+  def validateTerritories(territory: Set[Territory]): Option[Set[Territory]] = {
 
     @tailrec
-    def checkNeighbors(current: Seq[Territory], rest: Seq[Territory]): Boolean= {
-      val next: Seq[Territory] = current.flatMap(_.neighbors(rest.toSet))
+    def checkNeighbors(current: Set[Territory], rest: Set[Territory]): Boolean= {
+      val next: Set[Territory] = current.flatMap(_.neighbors(rest))
       if (current.isEmpty){
         rest.isEmpty
       } else {
-        checkNeighbors(next, rest.filterNot(next.contains))
+        checkNeighbors(next, rest.diff(next))
       }
     }
-    Some(territory).filter(_ => checkNeighbors(Seq(territory.head), territory.tail))
+
+    Some(territory).filter(_ => checkNeighbors(Set(territory.head), territory))
   }
 
   def create(settings: Settings, players: Seq[Player]): Game = {
