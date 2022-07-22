@@ -2,7 +2,7 @@ package controllers
 
 import akka.actor._
 import repositories.GameRoom
-import repositories.GameRoomRepository.{addToRoom, getRoom, handleMsg, updateRoom}
+import repositories.GameRoomRepository.{addToRoom, getRoom, handleMsg, leaveAllRooms}
 import views.html.game.HexView
 
 object GameRoomSocketActor {
@@ -27,7 +27,7 @@ class GameRoomSocketActor(out: ActorRef, user: String, roomId: String) extends A
 
   override def postStop(): Unit = {
     super.postStop()
-    val room = getRoom(roomId)
-    room.participants.foreach(_.actor ! "get-board")
+    leaveAllRooms(out)
+    getRoom(roomId).participants.foreach(_.actor ! "get-board")
   }
 }

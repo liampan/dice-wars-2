@@ -4,6 +4,7 @@ import akka.actor.ActorRef
 import controllers.PlayerActor
 import models.game.Game
 import repositories.GameRoomRepository.updateRoom
+import repositories.WaitingRoomRepository.rooms
 import views.html.messenger
 
 import scala.concurrent.ExecutionContext.Implicits.global
@@ -29,6 +30,7 @@ case class WaitingRoom(roomId: String, participants: Set[PlayerActor], log: Seq[
 
 case class GameRoom(roomId: String, participants: Set[PlayerActor], game: Game) {
   def addParticipant(p: PlayerActor) = this.copy(participants = participants + p)
+  def removeParticipant(p: ActorRef) = this.copy(participants = participants.filterNot(_.actor == p))
 
   //create a commands object that creates regex
   private val ClickMine: Regex = "click-mine-(.*)".r
@@ -75,6 +77,9 @@ object GameRoomRepository {
     cleanUp
     rooms.getOrElse(roomId, throw new IllegalArgumentException(s"room: '$roomId' does not exist"))
   }
+
+  def leaveAllRooms(af: ActorRef) =
+    rooms = rooms.map{case (key, room) => key -> room.removeParticipant(af)}
 
   def handleMsg(roomId: String, user: String, msg: String) =
     getRoom(roomId).handleMsg(user, msg)
