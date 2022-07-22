@@ -21,7 +21,8 @@ trait Player {
   def noClick: Player
 }
 
-case class Human(userId: String, number: Int, clickedTerritoryId: Option[String] = None, isAI: Boolean = false) extends Player{
+case class Human(userId: String, number: Int, clickedTerritoryId: Option[String] = None) extends Player{
+  override val isAI: Boolean = false
   override def noClick: Player = this.copy(clickedTerritoryId = None)
 }
 
@@ -84,17 +85,20 @@ case class Game(settings: Settings, boardState: Seq[Territory], players: Seq[Pla
   def thisTurn: Player = players.find((turn%settings.numberOfPlayers)+1 == _.number).getOrElse(throw new Exception("Player is missing"))
 
   def largestUnitedTerritory(player: Player) = {
-    val allPlayerTerritories = boardState.filter(_.player == player.number)
+    val allPlayerTerritories = boardState.filter(_.player == player.number).toSet
 
-    val groupedNeighbors = allPlayerTerritories.map(t =>
-        allPlayerTerritories.filter(j => t.neighbors(allPlayerTerritories.toSet).contains(j)) :+ t
-      )
+    @tailrec
+    def loop(grouped: Set[Territory]): Set[Territory] = {
+      val neighbors = grouped.flatMap(_.neighbors(allPlayerTerritories)) ++ grouped
+      if (neighbors == grouped) grouped
+      else loop(grouped ++ neighbors)
+    }
 
-    val map = allPlayerTerritories.map(t =>
-      groupedNeighbors.filter(_.contains(t)).maxBy(_.size)
-    ).distinct.groupBy(_.length)
-
-    map.maxBy(_._1)._2.maxBy(_.size)
+    allPlayerTerritories
+      .map(t => loop(Set(t)))
+      .maxByOption(_.size)
+      .getOrElse(Set.empty)
+      .toSeq
   }
 
   //(player, isTurn, stillIn, largestUnitedTerritoryCount)
