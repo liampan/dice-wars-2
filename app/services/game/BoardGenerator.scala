@@ -1,7 +1,8 @@
 package services.game
 
 import com.google.inject.Inject
-import models.game.{Game, Hex, Settings, Player, Territory}
+import models.game.{Game, Hex, Player, Settings, Territory}
+import services.game.BoardGenerator.splitDice
 
 import scala.annotation.tailrec
 import scala.util.{Random => ScalaRandom}
@@ -29,6 +30,12 @@ class BoardGenerator @Inject()(random: ScalaRandom = ScalaRandom) {
     }
   }
 
+  def splitStartDice(averageCount: Double, territoryCount: Int): Seq[Int] = {
+    val bonus = if (territoryCount < averageCount) 2 else 0
+    val totalDicePool = (3 * territoryCount) + bonus
+    splitDice(territoryCount, totalDicePool)
+  }
+
   private def generateTerritories(settings: Settings): Seq[Territory] = {
     val initHexes: Seq[Hex] = for {
       row <- Range.inclusive(0, settings.numberOfRows)
@@ -44,12 +51,19 @@ class BoardGenerator @Inject()(random: ScalaRandom = ScalaRandom) {
       else gen(available -- ter, acc :+ ter, 0)
     }
 
-    val territories: Seq[Territory] = gen(initHexes.toSet, Seq.empty, 0)
+    val territories: Map[Int, Seq[Territory]] = gen(initHexes.toSet, Seq.empty, 0)
       .filter(_.size >= settings.minTerritorySize)
       .zipWithIndex
-      .map{case (hexes, i) => Territory(hexes, (i%settings.numberOfPlayers)+1)}
+      .map{case (hexes, i) => Territory(hexes, (i%settings.numberOfPlayers)+1, 1)}
+      .groupBy(_.player)
 
-    validateTerritories(territories).getOrElse(generateTerritories(settings))
+    val averageTerritorySize = territories.map(_._2.length).sum / settings.numberOfPlayers.toDouble
+
+    val territoryWithDice = territories.flatMap{
+      case (_, t) => splitStartDice(averageTerritorySize, t.length).zip(t).map{case (dice, territory) => territory.copy(diceCount = Math.max(1, dice))}
+    }.toSeq
+
+    validateTerritories(territoryWithDice).getOrElse(generateTerritories(settings))
   }
 
   def validateTerritories(territory: Seq[Territory]): Option[Seq[Territory]] = {
@@ -72,4 +86,18 @@ class BoardGenerator @Inject()(random: ScalaRandom = ScalaRandom) {
     Game(settings = settings, boardState = territories, players = players)
   }
 
+}
+
+object BoardGenerator {
+  def splitDice(territoryCount: Int, totalDice: Int): Seq[Int] = {
+    val _territoryCount = territoryCount - 1
+    val diceAmounts = Seq.fill(_territoryCount)(1)
+      .foldLeft(Seq(Seq.fill(totalDice)(1))){
+        (seqs, _) =>
+          val (a, b) = seqs.last.splitAt(ScalaRandom.nextInt(4) + 1)
+          seqs.init ++ Seq(a, b)
+      }.map(_.length)
+    if (diceAmounts.exists(a => a > 8)) splitDice(territoryCount, totalDice)
+    else diceAmounts
+  }
 }

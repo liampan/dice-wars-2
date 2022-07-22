@@ -3,8 +3,7 @@ package repositories
 import akka.actor.ActorRef
 import controllers.PlayerActor
 import models.game.Game
-import repositories.GameRoomRepository.{getRoom, updateRoom}
-import views.html.game.HexView
+import repositories.GameRoomRepository.updateRoom
 import views.html.messenger
 
 import scala.util.matching.Regex

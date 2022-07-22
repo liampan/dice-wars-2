@@ -1,8 +1,9 @@
 package models.game
 
+import services.game.BoardGenerator
+
 import java.util.UUID
 import scala.annotation.tailrec
-import scala.util.Random
 
 case class Settings(
                    numberOfRows: Int,
@@ -66,10 +67,11 @@ case class Game(settings: Settings, boardState: Seq[Territory], players: Seq[Pla
     val ownTerritory = boardState.find(_.id == friendlyTerritoryId).getOrElse(throw new Exception("Friendly Territory is missing"))
     val enemyTerritory = boardState.find(_.id == enemyTerritoryId).getOrElse(throw new Exception("Enemy Territory is missing"))
      if (ownTerritory.attackable(Set(enemyTerritory)).contains(enemyTerritory)) {
-       val updated = enemyTerritory.copy(player = thisTurn.number)
+       val updatedFriendly = ownTerritory.postAttack
+       val updatedEnemy = if (ownTerritory.beats(enemyTerritory)) enemyTerritory.copy(player = thisTurn.number, diceCount = ownTerritory.diceCount -1) else enemyTerritory
        val player = thisTurn.noClick
        copy(
-         boardState = boardState.updated(boardState.indexOf(enemyTerritory), updated),
+         boardState = boardState.updated(boardState.indexOf(enemyTerritory), updatedEnemy).updated(boardState.indexOf(ownTerritory), updatedFriendly),
          players = players.updated(players.indexOf(thisTurn), player)
        )
      } else throw new Exception("trying to attack a non attack able territory")
@@ -116,9 +118,29 @@ case class Game(settings: Settings, boardState: Seq[Territory], players: Seq[Pla
   def playThisAITurn =
     thisTurn.asInstanceOf[AI].playTurn(this)
 
-  //todo
-  // - distribute dice
-  def endTurn: Game = this.copy(turn = turn + 1)
+  def endTurn: Game = {
+    val dice: Int = largestUnitedTerritory(thisTurn).size
+    val playerTerritories: Seq[Territory] = boardState.filter(_.player == thisTurn.number)
+
+    @tailrec
+    def adder(territories: Seq[Territory], dice: Int): Seq[Territory] = {
+      val dicePool = BoardGenerator.splitDice(playerTerritories.length, dice)
+      val a: Seq[(Territory, Int)] = territories.zip(dicePool).map{
+        case (territory, dice) => if ((territory.diceCount + dice) <= 8)
+          (territory.copy(diceCount = territory.diceCount + dice), 0)
+        else (territory.copy(diceCount = 8), dice + territory.diceCount - 8)
+      }
+      val t = a.map(_._1)
+      val d = a.map(_._2)
+      if (d.sum == 0 || t.forall(_.diceCount == 8)) t
+      else adder(t, d.sum)
+    }
+
+    this.copy(
+      boardState = boardState.filterNot(_.player == thisTurn.number) ++ adder(playerTerritories, dice),
+      turn = turn + 1
+    )
+  }
 
   def skipTurn: Game = if(thisTurnIsOut) this.copy(turn = turn + 1) else this
 

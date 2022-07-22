@@ -2,16 +2,20 @@ package models.game
 
 import java.util.UUID
 
-final case class Territory(hexes: Set[Hex], player: Int, id: String = UUID.randomUUID().toString) {
+final case class Territory(hexes: Set[Hex], player: Int, diceCount: Int, id: String = UUID.randomUUID().toString) {
 
   def belongsTo(p: Player): Boolean = p.number == player
 
-  private val row = hexes.toSeq.map(_.row).groupBy(i => i).mapValues(_.size).maxBy(_._2)._1
-  private val column = hexes.toSeq.map(_.column).groupBy(i => i).mapValues(_.size).maxBy(_._2)._1
-  private def evenRow: Boolean = row % 2 == 0
+  def postAttack: Territory = this.copy(diceCount = 1)
 
-  def topPx = (row * 28) + 22
-  def leftPx = (column * 31) + (if(evenRow) 23 else 31)
+  def beats(other: Territory): Boolean = {
+    diceCount > other.diceCount //todo actually roll dice. show this?
+  }
+
+  def centreMosthex = hexes.maxBy(_.confirmedNeighbors(hexes).size)
+
+  def topPx = centreMosthex.topPx
+  def leftPx = centreMosthex.leftPx
 
 
   def potentialNeighbors: Set[Hex] = hexes.flatMap(_.potentialNeighbors) -- hexes
