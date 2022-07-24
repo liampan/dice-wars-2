@@ -1,0 +1,21 @@
+@import helper._
+
+@this(main: main)
+
+@(form: Form[String])(implicit request: Request[_])
+
+@main("Enter a User name"){
+
+<h2>Enter a User name</h2>
+
+@if(form.hasErrors){
+    <p style="color: red">@form.errors.last.message</p>
+}
+
+@helper.form(action = routes.UserNameController.onSubmit()) {
+    @CSRF.formField
+    <input placeholder="name-gen" type="text" name="name" style="width:20vw">
+    <button style="width:8vw" type="submit">Ok</button>
+}
+
+}

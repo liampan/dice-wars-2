@@ -15,21 +15,23 @@ case class Settings(
 
 trait Player {
   val userId: String
+  val userName: String
   val number: Int
   val clickedTerritoryId: Option[String]
-  val isAI: Boolean
+  //val isAI: Boolean
   def noClick: Player
 }
 
-case class Human(userId: String, number: Int, clickedTerritoryId: Option[String] = None) extends Player{
-  override val isAI: Boolean = false
+case class Human(userId: String, userName: String, number: Int, clickedTerritoryId: Option[String] = None) extends Player{
+   val isAI: Boolean = false
   override def noClick: Player = this.copy(clickedTerritoryId = None)
 }
 
 //basic Ai attacks once per go.
 case class AI(number: Int) extends Player {
+  override val userName: String = "\uD835\uDE08\uD835\uDE10" // AI
   override val clickedTerritoryId: Option[String] = None
-  override val isAI: Boolean = true
+   val isAI: Boolean = true
   override val userId: String = "AI_" + UUID.randomUUID().toString.takeRight(5)
   override def noClick: Player = this
 
@@ -118,7 +120,7 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
   def gameComplete: Boolean =
     boardState.map(_.player).size == 1
 
-  def isAITurn: Boolean = thisTurn.isAI
+  def isAITurn: Boolean = thisTurn.isInstanceOf[AI]
   def thisTurnIsOut = !playerIsStillInPlay(thisTurn)
 
 

@@ -1,10 +1,16 @@
 
-GET     /test                          controllers.TestViewController.onPageLoad()
+GET     /                              controllers.LandingController.onPageLoad()
+POST    /                              controllers.LandingController.onSubmit()
+
+GET     /user                          controllers.UserNameController.onPageLoad()
+POST    /user                          controllers.UserNameController.onSubmit()
 
 GET     /join/:id                      controllers.GameController.waitingRoom(id)
 GET     /start/:id                     controllers.GameController.startGame(id)
+
 GET     /game                          controllers.GameController.game()
 
+# websocket routes
 GET     /ws-wait                           controllers.GameController.socketWaitingRoom
 GET     /ws-game                           controllers.GameController.socketGameRoom
 

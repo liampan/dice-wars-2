@@ -1,0 +1,21 @@
+@import helper._
+
+@this(main: main)
+
+@(form: Form[String])(implicit request: Request[_])
+
+@main("Start a game"){
+
+<h2>Start a game</h2>
+
+@if(form.hasErrors){
+<p style="color: red">@form.errors.last.message</p>
+}
+
+@helper.form(action = routes.LandingController.onSubmit()) {
+    @CSRF.formField
+    <input placeholder="name-gen" type="text" name="room" style="width:20vw">
+    <button style="width:8vw" type="submit">Create/Join game</button>
+}
+
+}

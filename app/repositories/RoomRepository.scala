@@ -4,10 +4,8 @@ import akka.actor.ActorRef
 import controllers.PlayerActor
 import models.game.Game
 import repositories.GameRoomRepository.updateRoom
-import repositories.WaitingRoomRepository.rooms
-import views.html.messenger
+import views.html.waitingRoom.MessengerPartial
 
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.matching.Regex
 
@@ -17,13 +15,13 @@ case class WaitingRoom(roomId: String, participants: Set[PlayerActor], log: Seq[
   def removeParticipant(p: ActorRef) = this.copy(participants = participants.filterNot(_.actor == p))
   def addLog(msg: String) = this.copy(log = log :+ msg)
 
-  def handleMsg(user: String, msg: String) = msg match {
-    case _ => execute(_.addLog(user + ": " + msg))
+  def handleMsg(userId: String, userName: String, msg: String) = msg match {
+    case _ => execute(_.addLog(userName + ": " + msg))
   }
 
   private def execute(action: WaitingRoom => WaitingRoom): Unit = {
     val r = WaitingRoomRepository.updateRoom(roomId, action(this))
-    r.participants.foreach(_.actor ! messenger(r.log).toString())
+    r.participants.foreach(_.actor ! MessengerPartial(r.log).toString())
   }
 }
 

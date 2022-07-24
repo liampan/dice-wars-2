@@ -1,21 +1,22 @@
 package controllers
 
 import actions.UserAction
-import akka.actor.{ActorPath, ActorRef, ActorSystem}
+import akka.actor.{ActorPath, ActorRef, ActorSystem, Props}
 import akka.stream.Materializer
 import com.google.inject.Inject
-import controllers.GameController.{roomKey, userIdKey}
+import controllers.GameController.{roomKey, userIdKey, usernameKey}
 import models.game.{AI, Human, Player, Settings}
 import play.api.libs.streams.ActorFlow
 import play.api.mvc.{Range => _, _}
 import repositories.WaitingRoomRepository
 import services.game.BoardGenerator
-import views.html.{Index, WaitingRoom}
+import views.html.game.GameScreenView
+import views.html.waitingRoom.WaitingRoomView
 
 import scala.concurrent.Future
 
-class GameController @Inject()(waitingRoomView: WaitingRoom,
-                               gameView: Index,
+class GameController @Inject()(waitingRoomView: WaitingRoomView,
+                               gameView: GameScreenView,
                                cc: ControllerComponents,
                                userAction: UserAction,
                                boardGenerator: BoardGenerator
@@ -24,7 +25,7 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
   //join/:room
   def waitingRoom(room: String): Action[AnyContent] = userAction {
     request =>
-      Ok(waitingRoomView(room)).addingToSession(userIdKey -> request.userName, roomKey -> room)(request)
+      Ok(waitingRoomView(room)).addingToSession(usernameKey -> request.userName, userIdKey -> request.userId, roomKey -> room)(request)
   }
 
   //this should be a post, from the start screen maybe?
@@ -39,7 +40,7 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
         .toSeq
         .zipWithIndex
         .find(_._2+1 == playerNumber)
-        .fold[Player](AI(playerNumber))(player => Human(player._1.userId, playerNumber))
+        .fold[Player](AI(playerNumber))(player => Human(player._1.userId, player._1.userName, playerNumber))
     }
 
     val game = boardGenerator.create(settings, players)
@@ -53,24 +54,24 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
     Ok(gameView())
   }
 
-  def socketWaitingRoom = WebSocket.acceptOrResult[String, String] { request =>
+  def socketWaitingRoom: WebSocket = WebSocket.acceptOrResult[String, String] { request =>
     Future.successful(
-      (request.session.get(userIdKey), request.session.get(roomKey)) match {
-        case (Some(user), Some(room)) =>
+      (request.session.get(userIdKey), request.session.get(usernameKey), request.session.get(roomKey)) match {
+        case (Some(userId), Some(userName), Some(room)) =>
           Right(ActorFlow.actorRef { out =>
-            WaitingRoomSocketActor.props(out, user, room)
+            WaitingRoomSocketActor.props(out, userId, userName, room)
           })
         case _ => Left(Forbidden)
       }
     )
   }
 
-  def socketGameRoom = WebSocket.acceptOrResult[String, String] { request =>
+  def socketGameRoom: WebSocket = WebSocket.acceptOrResult[String, String] { request =>
     Future.successful(
-      (request.session.get(userIdKey), request.session.get(roomKey)) match {
-        case (Some(user), Some(room)) =>
+      (request.session.get(userIdKey), request.session.get(usernameKey), request.session.get(roomKey)) match {
+        case (Some(userId), Some(userName), Some(room)) =>
           Right(ActorFlow.actorRef { out =>
-            GameRoomSocketActor.props(out, user, room)
+            GameRoomSocketActor.props(out, userId, userName, room)
           })
         case _ => Left(Forbidden)
       }
@@ -80,6 +81,7 @@ class GameController @Inject()(waitingRoomView: WaitingRoom,
 }
 
 object GameController {
-  val roomKey = "roomname"
-  val userIdKey = "username"
+  val roomKey = "room-name"
+  val userIdKey = "user-id"
+  val usernameKey = "user-name"
 }

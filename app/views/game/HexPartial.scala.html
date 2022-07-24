@@ -102,7 +102,8 @@ val bCss = Map(
                 @game.turnStatus.map{ case (player, isTurn, stillIn, largestUnitedTerritoryCount) =>
                     <div style="width: 80%;@turnStyle(isTurn, stillIn);display: table;">
                         <span style="padding-left:1vw;color: @{getColor(player.number)};display: table-cell">&#x2B22;</span>
-                        <span style="padding-left:1vw;max-width:30%;display: table-cell;">player: @player.number</span>
+                        <span style="padding-left:1vw;max-width:30%;display: table-cell;">@player.number</span>
+                        <span style="padding-left:1vw;max-width:30%;display: table-cell;">@player.userName</span>
                         <span style="padding-left:1vw;display: table-cell;">@largestUnitedTerritoryCount.size</span>
                     </div>
                 }
