@@ -5,8 +5,8 @@ POST    /                              controllers.LandingController.onSubmit()
 GET     /user                          controllers.UserNameController.onPageLoad()
 POST    /user                          controllers.UserNameController.onSubmit()
 
-GET     /join/:id                      controllers.GameController.waitingRoom(id)
-GET     /start/:id                     controllers.GameController.startGame(id)
+GET     /join/:id                      controllers.WaitingRoomController.waitingRoom(id)
+GET     /start/:id                     controllers.WaitingRoomController.startGame(id)
 
 GET     /game                          controllers.GameController.game()
 

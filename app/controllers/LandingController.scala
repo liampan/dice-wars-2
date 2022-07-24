@@ -30,7 +30,7 @@ class LandingController @Inject()(
       form.bindFromRequest()
         .fold(
           errorForm => Ok(view(errorForm)),
-          room => Redirect(routes.GameController.waitingRoom(room))
+          room => Redirect(routes.WaitingRoomController.waitingRoom(room))
         )
   }
 
