@@ -1,11 +1,9 @@
 package models.game
 
 import java.util.UUID
-import scala.util.Random
+import scala.util.{Random, Try}
 
 final case class Territory(hexes: Set[Hex], player: Int, diceCount: Int, id: String = UUID.randomUUID().toString) {
-
-  override def toString: String = s"Territory($player, $diceCount, ${id.takeRight(4)})"
 
   def belongsTo(p: Player): Boolean = p.number == player
 

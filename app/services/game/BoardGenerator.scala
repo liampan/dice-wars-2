@@ -31,7 +31,7 @@ class BoardGenerator @Inject()(random: ScalaRandom = ScalaRandom) {
   }
 
   def splitStartDice(averageCount: Double, territoryCount: Int): Seq[Int] = {
-    val bonus = if (territoryCount < averageCount) 2 else 0
+    val bonus = if (territoryCount < averageCount) 3 else 0
     val totalDicePool = (3 * territoryCount) + bonus
     splitDice(territoryCount, totalDicePool)
   }

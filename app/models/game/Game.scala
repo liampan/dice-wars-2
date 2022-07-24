@@ -4,6 +4,7 @@ import services.game.BoardGenerator
 
 import java.util.UUID
 import scala.annotation.tailrec
+import scala.util.Random
 
 case class Settings(
                    numberOfRows: Int,
@@ -18,12 +19,10 @@ trait Player {
   val userName: String
   val number: Int
   val clickedTerritoryId: Option[String]
-  //val isAI: Boolean
   def noClick: Player
 }
 
 case class Human(userId: String, userName: String, number: Int, clickedTerritoryId: Option[String] = None) extends Player{
-   val isAI: Boolean = false
   override def noClick: Player = this.copy(clickedTerritoryId = None)
 }
 
@@ -31,7 +30,6 @@ case class Human(userId: String, userName: String, number: Int, clickedTerritory
 case class AI(number: Int) extends Player {
   override val userName: String = "\uD835\uDE08\uD835\uDE10" // AI
   override val clickedTerritoryId: Option[String] = None
-   val isAI: Boolean = true
   override val userId: String = "AI_" + UUID.randomUUID().toString.takeRight(5)
   override def noClick: Player = this
 
@@ -75,10 +73,9 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
      if (ownTerritory.attackable(boardState.toSet).contains(enemyTerritory) && ownTerritory.diceCount > 1) {
        val updatedFriendly = ownTerritory.postAttack
        val updatedEnemy = if (ownTerritory.beats(enemyTerritory)) enemyTerritory.copy(player = thisTurn.number, diceCount = ownTerritory.diceCount -1) else enemyTerritory
-       val player = thisTurn.noClick
        copy(
          boardState = boardState - enemyTerritory - ownTerritory + updatedEnemy + updatedFriendly,
-         players = players.updated(players.indexOf(thisTurn), player)
+         players = players.map(_.noClick)
        )
      } else throw new Exception(s"trying to attack a non attack able territory ${ownTerritory} -> ${enemyTerritory} = ${ownTerritory.attackable(Set(enemyTerritory))}")
   }
@@ -102,13 +99,14 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
       .toSeq
   }
 
-  //(player, isTurn, stillIn, largestUnitedTerritoryCount)
-  def turnStatus: Seq[(Player, Boolean, Boolean, Seq[Territory])] = players.map{
+  //(player, isTurn, stillIn, largestUnitedTerritoryCount, diceCount)
+  def turnStatus: Seq[(Player, Boolean, Boolean, Seq[Territory], Int)] = players.map{
     player =>
       val isTurn = (turn%settings.numberOfPlayers)+1 == player.number
       val stillPlaying = playerIsStillInPlay(player)
       val largestUnitedTerritoryCount = largestUnitedTerritory(player) //.size
-      (player, isTurn, stillPlaying, largestUnitedTerritoryCount)
+      val diceCount = boardState.filter(_.player == player.number).toSeq.map(_.diceCount).sum
+      (player, isTurn, stillPlaying, largestUnitedTerritoryCount, diceCount)
   }
 
   def playerIsStillInPlay(player: Player) =
@@ -131,24 +129,21 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
     val dice: Int = largestUnitedTerritory(thisTurn).size
     val playerTerritories: Set[Territory] = boardState.filter(_.player == thisTurn.number)
 
-    def adder(territories: Set[Territory], dice: Int): Set[Territory] = {
-      val dicePool = BoardGenerator.splitDice(playerTerritories.size, dice)
-      val a: Set[(Territory, Int)] = territories.zip(dicePool).map{
-        case (territory, dice) => if ((territory.diceCount + dice) <= 8)
-          (territory.copy(diceCount = territory.diceCount + dice), 0)
-        else (territory.copy(diceCount = 8), dice + territory.diceCount - 8)
+    def adder(territories: Seq[Territory], dice: Int): Set[Territory] =
+      if(territories.forall(_.diceCount == 8) || dice == 0) territories.toSet
+      else {
+        val t = territories.find(_.diceCount < 8).get
+        val newT = t.copy(diceCount = t.diceCount + 1)
+        val newTerritories = territories.updated(territories.indexOf(t), newT)
+        adder(Random.shuffle(newTerritories), dice - 1)
       }
-      val t = a.map(_._1)
-      val d = a.map(_._2)
-      if (d.sum == 0 || t.forall(_.diceCount == 8)) t
-      else t.filter(_.diceCount == 8) ++ adder(t.filterNot(_.diceCount == 8), d.sum)
-    }
 
-    val added = adder(playerTerritories, dice) //this already should eb distinc but there is a bug occasionally duping, this fixes but probs should look for actual cause
+    val added = adder(playerTerritories.toSeq, dice)
     val newBoardState = boardState.filterNot(_.player == thisTurn.number) ++ added
 
     this.copy(
       boardState = newBoardState,
+      players = players.map(_.noClick),
       turn = turn + 1
     )
   }
