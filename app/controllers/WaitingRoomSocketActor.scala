@@ -1,7 +1,6 @@
 package controllers
 
 import akka.actor._
-import repositories.WaitingRoom
 import repositories.WaitingRoomRepository._
 
 case class PlayerActor(userId: String, userName: String, actor: ActorRef)

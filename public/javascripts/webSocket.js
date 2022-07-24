@@ -22,36 +22,12 @@ function webSocket() {
     }
 }
 
-function sendMessage(msg) {
-    console.log("sending:" + msg);
-    socket.send(msg);
-}
-
-function onMessage(evt) {
-    var received_msg = evt.data;
-    if (received_msg == 'start-game') setTimeout(function() {
-        window.location.replace(gameUrl);
-    }, 500);
-
-    if (received_msg == 'get-board') sendMessage(received_msg)
-    else {
-        document.getElementById('screen').innerHTML = received_msg;
-        document.querySelector('[autofocus]').focus()
-    }
-}
-
-
 function onClose(evt) {
     console.log("Websocket closed, trying to reconnect in "+ webSocketRetryDelay + " seconds")
 
     setTimeout(function() {
         webSocket();
     }, webSocketRetryDelay * 1000);
-}
-
-function onOpen(evt) {
-    sendMessage("joined")
-    console.log('evt', evt);
 }
 
 webSocket();

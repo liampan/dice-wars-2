@@ -1,17 +1,13 @@
 package controllers
 
 import actions.UserAction
-import akka.actor.{ActorPath, ActorRef, ActorSystem, Props}
+import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.google.inject.Inject
 import controllers.GameController.{roomKey, userIdKey, usernameKey}
-import models.game.{AI, Human, Player, Settings}
 import play.api.libs.streams.ActorFlow
 import play.api.mvc.{Range => _, _}
-import repositories.WaitingRoomRepository
-import services.game.BoardGenerator
 import views.html.game.GameScreenView
-import views.html.waitingRoom.WaitingRoomView
 
 import scala.concurrent.Future
 

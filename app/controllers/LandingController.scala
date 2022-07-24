@@ -2,7 +2,6 @@ package controllers
 
 import actions.UserAction
 import com.google.inject.Inject
-import controllers.GameController.{roomKey, userIdKey, usernameKey}
 import play.api.data.Form
 import play.api.data.Forms.nonEmptyText
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
