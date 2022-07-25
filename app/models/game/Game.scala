@@ -51,7 +51,7 @@ case class AI(number: Int) extends Player {
 }
 
 
-case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Player], turn: Int = 0) { //skip turn if player is out
+case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Player], turn: Int = 0, lastAttack: Option[(Territory, Territory)] = None) { //skip turn if player is out
 
   def getTerritoryById(id: String): Option[Territory] = boardState.find(_.id == id)
 
@@ -75,7 +75,8 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
        val updatedEnemy = if (ownTerritory.beats(enemyTerritory)) enemyTerritory.copy(player = thisTurn.number, diceCount = ownTerritory.diceCount -1) else enemyTerritory
        copy(
          boardState = boardState - enemyTerritory - ownTerritory + updatedEnemy + updatedFriendly,
-         players = players.map(_.noClick)
+         players = players.map(_.noClick),
+         lastAttack = Some(updatedFriendly, updatedEnemy)
        )
      } else throw new Exception(s"trying to attack a non attack able territory ${ownTerritory} -> ${enemyTerritory} = ${ownTerritory.attackable(Set(enemyTerritory))}")
   }

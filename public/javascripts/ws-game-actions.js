@@ -10,7 +10,6 @@ function onMessage(evt) {
     if (received_msg == 'get-board') sendMessage(received_msg)
     else {
         document.getElementById('screen').innerHTML = received_msg;
-        document.querySelector('[autofocus]').focus()
     }
 }
 
@@ -18,3 +17,8 @@ function onOpen(evt) {
     sendMessage('get-board')
     console.log('web socket open.')
 }
+
+// arrow might not be placed right if screen changes size
+//window.onresize = () => {
+//  location.reload();
+//}

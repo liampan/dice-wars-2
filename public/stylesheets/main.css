@@ -53,6 +53,7 @@ background-image: url("data:image/svg+xml,%3Csvg width='32' height='64' viewBox=
     height: 39.5vw;
     position: relative;
     float:left;
+    font-size:1vw;
 }
 
 .endTurn {
@@ -70,4 +71,10 @@ background-image: url("data:image/svg+xml,%3Csvg width='32' height='64' viewBox=
 .endTurn:active {
     color:red;
     box-shadow: 0 0 5px -1px rgba(0,0,0,0.6);
+}
+.arrow {
+  stroke: rgb(0, 0, 0);
+  stroke-opacity:0.7;
+  stroke-width: 2;
+  marker-end: url(#markerArrow)
 }

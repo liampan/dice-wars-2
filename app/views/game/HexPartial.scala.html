@@ -74,10 +74,30 @@ val bCss = Map(
     } else "null"
 }
 
+@attack = @{
+    val gg = game.boardState.filter(_.player == 1)
+    (gg.head, gg.head.attackable(game.boardState).head)
+}
+
+
 @if(gameOver){
     <h1>GAME OVER</h1>
 }
 <div style="overflow: hidden;">
+
+    @game.lastAttack.map{attack =>
+        <svg class="boardWrapper" style="position: absolute;z-index:110;pointer-events: none;margin: 1vw;">
+
+            <defs>
+                <marker id="markerArrow" markerWidth="13" markerHeight="13" refX="2" refY="6" orient="auto" style="pointer-events: none;">
+                    <path d="M2,2 L2,11 L10,6 L2,2" style="fill: #000000;stroke-opacity:0.7;z-index:110;pointer-events: none;" />
+                </marker>
+            </defs>
+            <line x1="@{attack._1.leftPx+0.5}vw" y1="@{attack._1.topPx+1.5}vw" x2="@{attack._2.leftPx+0.5}vw" y2="@{attack._2.topPx+1.5}vw" class="arrow" style="position: absolute;z-index:100;pointer-events: none;"/>
+
+        </svg>
+    }
+
     <div class="boardWrapper aztec">
         @game.boardState.map{ territory =>
             <span class="@territoryClasses(game.thisTurn, territory)" style="color: @{getColor(territory.player)}" onclick="@territoryClassesOnClick(game.thisTurn, territory)">
@@ -90,6 +110,7 @@ val bCss = Map(
             </span>
         }
     </div>
+
     <div class="infoTabWrapper">
             <div style="width:100%;display: table;">
                     <span style="display: table-cell;text-align: center;color:grey">@userId</span>

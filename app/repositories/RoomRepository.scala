@@ -6,7 +6,6 @@ import models.game.Game
 import repositories.GameRoomRepository.updateRoom
 import views.html.waitingRoom.MessengerPartial
 
-import scala.concurrent.Future
 import scala.util.matching.Regex
 
 //todo give participants names?
@@ -45,11 +44,12 @@ case class GameRoom(roomId: String, participants: Set[PlayerActor], game: Game) 
 
   private def doNothing(): Unit = execute(_ => false)(identity)
 
-  private def execute(predicate: Game => Boolean)(action: Game => Game): Unit = {
-    val gr = if (predicate(game)) this.copy(game = action(game)) else this
-    updateRoom(roomId, gr)
-    gr.participants.foreach(_.actor ! "get-board")
-  }
+  private def execute(predicate: Game => Boolean)(action: Game => Game): Unit =
+    if (predicate(game)){
+      val gr = this.copy(game = action(game))
+      updateRoom(roomId, gr)
+      gr.participants.foreach(_.actor ! "get-board")
+    }
 }
 
 object GameRoomRepository {
@@ -58,10 +58,8 @@ object GameRoomRepository {
   def cleanUp =
     rooms = rooms.filter{case (_, room) => room.participants.nonEmpty }
 
-  private def doUpdate(roomId: String, room: GameRoom): Unit = rooms = rooms.updated(roomId, room)
-
   def updateRoom(roomId: String, room: GameRoom) =
-    Future.successful(doUpdate(roomId, room))
+    rooms = rooms.updated(roomId, room)
 
   def addRoom(room: GameRoom) = {
     rooms = rooms + (room.roomId -> room)
