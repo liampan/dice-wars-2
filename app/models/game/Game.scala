@@ -50,8 +50,11 @@ case class AI(number: Int) extends Player {
   }
 }
 
+case class Attack(attacker: Territory, defender: Territory, attackDice: Seq[Int], defendDice: Seq[Int]){
+  def attackerWin: Boolean = attackDice.sum > defendDice.sum
+}
 
-case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Player], turn: Int = 0, lastAttack: Option[(Territory, Territory)] = None) { //skip turn if player is out
+case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Player], turn: Int = 0, lastAttack: Option[Attack] = None) { //skip turn if player is out
 
   def getTerritoryById(id: String): Option[Territory] = boardState.find(_.id == id)
 
@@ -70,13 +73,14 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
   def attack(friendlyTerritoryId: String, enemyTerritoryId: String): Game = {
     val ownTerritory = boardState.find(_.id == friendlyTerritoryId).getOrElse(throw new Exception("Friendly Territory is missing"))
     val enemyTerritory = boardState.find(_.id == enemyTerritoryId).getOrElse(throw new Exception("Enemy Territory is missing"))
-     if (ownTerritory.attackable(boardState.toSet).contains(enemyTerritory) && ownTerritory.diceCount > 1) {
+     if (ownTerritory.attackable(boardState).contains(enemyTerritory) && ownTerritory.diceCount > 1) {
        val updatedFriendly = ownTerritory.postAttack
-       val updatedEnemy = if (ownTerritory.beats(enemyTerritory)) enemyTerritory.copy(player = thisTurn.number, diceCount = ownTerritory.diceCount -1) else enemyTerritory
+       val attack = ownTerritory.attack(enemyTerritory)
+       val updatedEnemy = if (attack.attackerWin) enemyTerritory.copy(player = thisTurn.number, diceCount = ownTerritory.diceCount -1) else enemyTerritory
        copy(
          boardState = boardState - enemyTerritory - ownTerritory + updatedEnemy + updatedFriendly,
          players = players.map(_.noClick),
-         lastAttack = Some(updatedFriendly, updatedEnemy)
+         lastAttack = Some(attack)
        )
      } else throw new Exception(s"trying to attack a non attack able territory ${ownTerritory} -> ${enemyTerritory} = ${ownTerritory.attackable(Set(enemyTerritory))}")
   }
@@ -115,7 +119,7 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
     players.filter(_.isInstanceOf[Human]).exists(playerIsStillInPlay)
 
   def gameComplete: Boolean =
-    boardState.map(_.player).size == 1
+    boardState.map(_.player).size == 1 || !humanPlayersLeft
 
   def isAITurn: Boolean = thisTurn.isInstanceOf[AI]
   def thisTurnIsOut = !playerIsStillInPlay(thisTurn)

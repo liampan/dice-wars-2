@@ -85,7 +85,7 @@ val bCss = Map(
 }
 <div style="overflow: hidden;">
 
-    @game.lastAttack.map{attack =>
+    @game.lastAttack.map{lastAttack =>
         <svg class="boardWrapper" style="position: absolute;z-index:110;pointer-events: none;margin: 1vw;">
 
             <defs>
@@ -93,7 +93,7 @@ val bCss = Map(
                     <path d="M2,2 L2,11 L10,6 L2,2" style="fill: #000000;stroke-opacity:0.7;z-index:110;pointer-events: none;" />
                 </marker>
             </defs>
-            <line x1="@{attack._1.leftPx+0.5}vw" y1="@{attack._1.topPx+1.5}vw" x2="@{attack._2.leftPx+0.5}vw" y2="@{attack._2.topPx+1.5}vw" class="arrow" style="position: absolute;z-index:100;pointer-events: none;"/>
+            <line x1="@{lastAttack.attacker.leftPx+0.5}vw" y1="@{lastAttack.attacker.topPx+1.5}vw" x2="@{lastAttack.defender.leftPx+0.5}vw" y2="@{lastAttack.defender.topPx+1.5}vw" class="arrow" style="position: absolute;z-index:100;pointer-events: none;"/>
 
         </svg>
     }
@@ -130,13 +130,23 @@ val bCss = Map(
                     </div>
                 }
 
-            <div id="button-box" style="width:16vw; height:3vw;margin: 0 auto;padding: 10px;position: relative;">
+            <div id="button-box" style="width:16vw;height:6vw;margin: 0 auto;padding: 10px;position: relative;">
                 @if(game.rightPlayer(userId) && !gameOver) {
                     <p>1. Click your area. 2. Click neighbor to attack</p>
 
                     <div class="endTurn" onclick="sendMessage('end-turn')">
                         End turn
                     </div>
+                }
+            </div>
+
+            <div id="dice-box" style="width:16vw;margin: 0 auto;padding: 10px;position: relative;">
+                @game.lastAttack.map{ lastAttack =>
+                    <span style="padding-left:1vw;color: @{getColor(lastAttack.attacker.player)};font-size:2em;">&#x2B22;</span>
+                    <span>@lastAttack.attackDice.mkString(", ")</span>
+                    <br>
+                    <span style="padding-left:1vw;color: @{getColor(lastAttack.defender.player)};font-size:2em;">&#x2B22;</span>
+                    <span>@lastAttack.defendDice.mkString(", ")</span>
                 }
             </div>
     </div>

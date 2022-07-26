@@ -9,9 +9,10 @@ final case class Territory(hexes: Set[Hex], player: Int, diceCount: Int, id: Str
 
   def postAttack: Territory = this.copy(diceCount = 1)
 
-  def beats(other: Territory): Boolean = {
-    //todo actually roll dice. show this?
-    Seq.fill(diceCount)(Random.nextInt(5)+1).sum > Seq.fill(other.diceCount)(Random.nextInt(5)+1).sum
+  def attack(other: Territory): Attack = {
+    val attackDice = Seq.fill(diceCount)(Random.nextInt(5) + 1)
+    val defendDice = Seq.fill(other.diceCount)(Random.nextInt(5) + 1)
+    Attack(this, other, attackDice, defendDice)
   }
 
   def centreMosthex = hexes.maxBy(_.confirmedNeighbors(hexes).size)
