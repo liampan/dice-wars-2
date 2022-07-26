@@ -126,6 +126,16 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
   def gameComplete: Boolean =
     boardState.map(_.player).size == 1 || !humanPlayersLeft
 
+  def winnerPlayerNumber: Option[Int] = {
+    val inPlay = boardState.map(_.player)
+    if (inPlay.size == 1) inPlay.headOption else None
+  }
+
+  def playerNumberFormId(id: String): Int =
+    players.find(_.userId == id).map(_.number)
+      .getOrElse(throw new IllegalStateException(s"Player is missing $id"))
+
+
   def isAITurn: Boolean = thisTurn.isInstanceOf[AI]
   def thisTurnIsOut = !playerIsStillInPlay(thisTurn)
 
