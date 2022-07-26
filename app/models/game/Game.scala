@@ -83,29 +83,27 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
 
   def thisTurn: Player = players.find((turn%settings.numberOfPlayers)+1 == _.number).getOrElse(throw new Exception("Player is missing"))
 
-  def largestUnitedTerritory(player: Player) = {
-    val allPlayerTerritories = boardState.filter(_.player == player.number).toSet
+  def largestUnitedTerritorySize(player: Player) = {
+    val allPlayerTerritories = boardState.filter(_.player == player.number)
+    val neightborsMap = allPlayerTerritories.map(t => t.id -> t.neighbors(allPlayerTerritories).map(_.id)).toMap
 
     @tailrec
-    def loop(grouped: Set[Territory]): Set[Territory] = {
-      val neighbors = grouped.flatMap(_.neighbors(allPlayerTerritories)) ++ grouped
-      if (neighbors == grouped) grouped
+    def loop(grouped: Set[String]): Int = {
+      val neighbors = grouped.flatMap(t => neightborsMap(t)) ++ grouped
+      if (neighbors == grouped) grouped.size
       else loop(grouped ++ neighbors)
     }
 
-    allPlayerTerritories
-      .map(t => loop(Set(t)))
-      .maxByOption(_.size)
-      .getOrElse(Set.empty)
-      .toSeq
+    allPlayerTerritories.maxByOption(t => loop(Set(t.id))).map(t => loop(Set(t.id))).getOrElse(0)
+
   }
 
   //(player, isTurn, stillIn, largestUnitedTerritoryCount, diceCount)
-  def turnStatus: Seq[(Player, Boolean, Boolean, Seq[Territory], Int)] = players.map{
+  def turnStatus: Seq[(Player, Boolean, Boolean, Int, Int)] = players.map{
     player =>
       val isTurn = (turn%settings.numberOfPlayers)+1 == player.number
       val stillPlaying = playerIsStillInPlay(player)
-      val largestUnitedTerritoryCount = largestUnitedTerritory(player) //.size
+      val largestUnitedTerritoryCount = largestUnitedTerritorySize(player)
       val diceCount = boardState.filter(_.player == player.number).toSeq.map(_.diceCount).sum
       (player, isTurn, stillPlaying, largestUnitedTerritoryCount, diceCount)
   }
@@ -127,7 +125,7 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
     thisTurn.asInstanceOf[AI].playTurn(this)
 
   def endTurn: Game = {
-    val dice: Int = largestUnitedTerritory(thisTurn).size
+    val dice: Int = largestUnitedTerritorySize(thisTurn)
     val playerTerritories: Set[Territory] = boardState.filter(_.player == thisTurn.number)
 
     def adder(territories: Seq[Territory], dice: Int): Set[Territory] =
