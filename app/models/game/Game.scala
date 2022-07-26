@@ -60,6 +60,11 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
 
   def rightPlayer(userId: String): Boolean = thisTurn.userId.toUpperCase == userId.toUpperCase
 
+  def notify(userId: String): Boolean =
+    rightPlayer(userId) &&
+      thisTurn.clickedTerritoryId.isEmpty &&
+      !lastAttack.exists(_.attacker.player == thisTurn.number)
+
   def clickMine(territoryId: String): Game = {
     val updated = thisTurn.asInstanceOf[Human].copy(clickedTerritoryId = Some(territoryId))
     copy(players = players.updated(players.indexOf(thisTurn), updated))

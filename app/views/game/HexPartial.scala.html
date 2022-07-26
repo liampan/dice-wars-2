@@ -117,7 +117,7 @@ val bCss = Map(
                     <span style="display: table-cell;text-align: center;color:grey">Turn: @{game.turn}</span>
             </div>
             <div style="height: 2em;width:100%;">
-                <img id="sound" style="width:1vw;" src="@routes.Assets.versioned("images/favicon.png")" @if(game.rightPlayer(userId)){onload="notify()"} onclick="toggleNoise()" >
+                <img id="sound" style="width:1vw;" src="@routes.Assets.versioned("images/favicon.png")" @if(game.notify(userId)){onload="notify()"} onclick="toggleNoise()" >
                 @if(game.rightPlayer(userId)){
                     It's your turn!
                 }
