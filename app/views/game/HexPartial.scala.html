@@ -8,12 +8,12 @@ def getVectors(width: Double): (Double, Double) = {
 (width * 0.5, width * 0.875)
 }
 
-val pixels = 2.25
+val pixels = 2.5
 val blur = 0.5
 val (right, down) = getVectors(pixels)
 
 val bCss = Map(
-    //    r   d   b   color
+    //      right     down   blur   color
     1 -> s"-${pixels}px 0px ${blur}px #000",
     2 -> s"-${right}px -${down}px ${blur}px #000",
     3 -> s"${right}px -${down}px ${blur}px #000",
@@ -22,7 +22,7 @@ val bCss = Map(
     6 -> s"-${right}px ${down}px ${blur}px #000"
 )
     val cCss = Map(
-    //    r   d   b   color
+    //       right     down   blur   color
     1 -> s"-${pixels}px 0px ${blur}px $color",
     2 -> s"-${right}px -${down}px ${blur}px $color",
     3 -> s"${right}px -${down}px ${blur}px $color",
@@ -110,7 +110,7 @@ val bCss = Map(
             <span class="@territoryClasses(game.thisTurn, territory)" style="color: @{getColor(territory.player)}" onclick="@territoryClassesOnClick(game.thisTurn, territory)">
                 <div style="top:@{territory.topPx}vw;left:@{territory.leftPx}vw;position: absolute;z-index:100;font-size:3vw;padding-left:1vw;color: black;background-color:white;" >@territory.diceCount</div>
                 @territory.hexes.map{ hex: Hex =>
-                    <div class="borderChild" style="top:@{hex.topPx}vw;left:@{hex.leftPx}vw;position: absolute; font-size:3vw;padding-left:0.5vw;@stroke(hex.needsBorder(territory.hexes), getColor(territory.player));">
+                    <div class="borderChild" style="top:@{hex.topPx}vw;left:@{hex.leftPx}vw;@stroke(hex.needsBorder(territory.hexes), getColor(territory.player));">
                         &#x2B22;
                     </div>
                 }

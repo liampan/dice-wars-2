@@ -21,11 +21,12 @@ class WaitingRoomController @Inject()(waitingRoomView: WaitingRoomView,
   def waitingRoom(room: String): Action[AnyContent] = userAction {
     request =>
       Ok(waitingRoomView(room))
-        .addingToSession(usernameKey -> request.userName, userIdKey -> request.userId, roomKey -> room)(request)
+        .withSession(usernameKey -> request.userName, userIdKey -> request.userId, roomKey -> room)
   }
 
   //this should be a post, from the start screen maybe?
   def startGame(room: String): Action[AnyContent] = userAction {
+    request =>
     val settings = Settings(8, 10, 50)
     //val settings = Settings(10, 10, 30)
     //val settings = Settings(3, 30, 50)
@@ -45,6 +46,11 @@ class WaitingRoomController @Inject()(waitingRoomView: WaitingRoomView,
     newRoom.participants.foreach(_.actor ! "start-game")
 
     Redirect(routes.GameController.game())
+      .addingToSession(
+        usernameKey -> request.userName,
+        userIdKey -> request.userId,
+        roomKey -> room)(request)
+
   }
 
 }

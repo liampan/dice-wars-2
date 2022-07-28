@@ -5,6 +5,12 @@
 .borderParent .borderChild {
 }
 
+.borderChild{
+position: absolute;
+font-size:3vw !important;
+padding-left:0.5vw
+}
+
 .clickedTerritory{
     color: black !important;
 }
