@@ -1,13 +1,47 @@
+@import helper._
+
 @this(main: main)
 
-@(gameId: String)
+@(gameId: String, form: Form[_])(implicit request: Request[_])
 
 @main("Staring dice wars 2"){
 
 <h2>Waiting Room</h2>
 
+<!--make this only appear for player 1-->
 
-<a href="@routes.WaitingRoomController.startGame(gameId)">Start</a>
+@if(form.hasErrors){
+<p style="color: red">@form.errors.last.message</p>
+}
+
+@helper.form(action = routes.WaitingRoomController.startGame(gameId)) {
+@CSRF.formField
+<div>
+        <label for="ai-count">number of AI's</label>
+        <input id="ai-count" value="4" type="range" name="ai-count" min="0" max="15" oninput="this.nextElementSibling.value = this.value">
+        <output>4</output>
+</div>
+
+<p>smaller territories mean there will be more of them</p>
+<p>the greater the range between territory sizes, will mean gaps get better filled so there will be less lakes/seas</p>
+
+<div>
+        <script>function minUpdate(){var min = document.getElementById('min-size');min.nextElementSibling.value = min.value;var max = document.getElementById('max-size'); if (min.value > max.value){max.value = min.value; max.nextElementSibling.value = max.value}}</script>
+        <label for="min-size">minimum number of hex per territory</label>
+        <input id="min-size" value="10" type="range" name="min-size" min="1" max="30"  oninput="minUpdate()">
+        <output>10</output>
+</div>
+
+<div>
+        <script>function maxUpdate(){var max = document.getElementById('max-size');max.nextElementSibling.value = max.value;var min = document.getElementById('min-size'); if (min.value > max.value){min.value = max.value; min.nextElementSibling.value = min.value}}</script>
+        <label for="max-size">maximum number of hex per territory</label>
+        <input id="max-size" value="40" type="range" name="max-size" min="10" max="100"  oninput="maxUpdate()">
+        <output>40</output>
+</div>
+<div>
+        <button type="submit">Start</button>
+</div>
+}
 
 <div id="screen">
         delete me
