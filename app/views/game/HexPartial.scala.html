@@ -117,8 +117,8 @@ val bCss = Map(
 
         @game.boardState.map{ territory =>
             <span class="@territoryClasses(game.thisTurn, territory)" style="--hex-color: @{getColor(territory.player)}" onclick="@territoryClassesOnClick(game.thisTurn, territory)">
-                <div style="top:@{territory.topPx}vw;left:@{territory.leftPx}vw;position: absolute;z-index:100;font-size:3vw;padding-left:1vw;color: black;background-color:white;" >@territory.diceCount</div>
-                @territory.hexes.map{ hex: Hex =>
+                @Dice(territory)
+                 @territory.hexes.map{ hex: Hex =>
                     <div class="borderChild" style="top:@{hex.topPx}vw;left:@{hex.leftPx}vw;">
                         @Hexagon(hex.needsBorder(territory.hexes))
                     </div>
@@ -159,13 +159,13 @@ val bCss = Map(
                 }
             </div>
 
-            <div id="dice-box" style="width:16vw;margin: 0 auto;padding: 10px;position: relative;">
+            <div id="dice-box" style="width:18vw;margin: 0 auto;padding: 5px;position: relative;">
                 @game.lastAttack.map{ lastAttack =>
                     <span style="padding-left:1vw;color: @{getColor(lastAttack.attacker.player)};font-size:2em;">&#x2B22;</span>
-                    <span>@lastAttack.attackDice.mkString(", ")</span>
+                    <span>@lastAttack.attackDice.mkString(" + ") = @lastAttack.attackDice.sum</span>
                     <br>
                     <span style="padding-left:1vw;color: @{getColor(lastAttack.defender.player)};font-size:2em;">&#x2B22;</span>
-                    <span>@lastAttack.defendDice.mkString(", ")</span>
+                    <span>@lastAttack.defendDice.mkString(" + ") = @lastAttack.defendDice.sum</span>
                 }
             </div>
     </div>
