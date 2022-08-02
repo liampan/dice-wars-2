@@ -104,13 +104,15 @@ val bCss = Map(
 
     <div class="boardWrapper aztec">
         @if(gameOver){
-        <div style="left:50%;top:50%;transform:translate(-50%, -50%);font-size:10vw;position: absolute;z-index:111;">
             @if(game.winnerPlayerNumber.contains(game.playerNumberFormId(userId))){
-                VICTORY
+                <div style="left:50%;top:50%;transform:translate(-50%, -50%);font-size:10vw;position: absolute;z-index:111;" class="goldtextcss">
+                    VICTORY
+                </div>
             } else {
-               DEFEAT
+                <div style="left:50%;top:50%;transform:translate(-50%, -50%);font-size:10vw;position: absolute;z-index:111;text-shadow:1px 1px 10px red, 1px 1px 10px blue;">
+                    DEFEAT
+                </div>
             }
-            </div>
         }
 
         @game.boardState.map{ territory =>

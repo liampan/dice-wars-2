@@ -16,14 +16,14 @@ class testController @Inject()(testView: Test,
                               )(implicit system: ActorSystem, mat: Materializer) extends AbstractController(cc) {
 
   def test() = Action {
-    val settings = Settings(8, 10, 50)
+    val settings = Settings(1, 10, 50)
 
     //val game = Game(Settings(1, 1, 1), boardState = Set(Territory(Set((1,0), (0,1), (0,2), (1,2), (2,2), (2,1)).map(Hex.tupled), 1, 1)), Seq(Human("pan", "pan", 1)))
     //val game = Game(Settings(1, 1, 1), boardState = Set(Territory(Set((1,0), (1, 1)).map(Hex.tupled), 1, 1)), Seq(Human("pan", "pan", 1)))
 
-    val game = boardGenerator.create(settings, Seq(Human("pan", "pan", 1)))
+    val game = boardGenerator.create(settings, Seq(Human("pan", "pan", 1), Human("notpan", "notpan", 2)))
 
-    Ok(testView(HexPartial(game, "blah", false)))
+    Ok(testView(HexPartial(game, "notpan", false)))
   }
 
 }
