@@ -1,0 +1,18 @@
+
+@(borders: Seq[Int])
+
+@Seq(1, 2, 3, 4, 5, 6).filterNot(borders.contains).map{ i: Int =>
+    <div class="hex-border-@{i}">
+        <div class="hex-border" style="z-index:-5 !important"></div>
+    </div>
+}
+
+@borders.map{ i: Int=>
+<div class="hex-border-@{i}">
+    <div class="hex-border" style="border-left-color: black;z-index:5 !important"></div>
+</div>
+}
+
+<div class="hex-top"></div>
+<div class="hex-middle"></div>
+<div class="hex-bottom"></div>

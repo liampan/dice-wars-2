@@ -2,6 +2,8 @@
 GET     /                              controllers.LandingController.onPageLoad()
 POST    /                              controllers.LandingController.onSubmit()
 
+GET /test                               controllers.testController.test()
+
 GET     /user                          controllers.UserNameController.onPageLoad()
 POST    /user                          controllers.UserNameController.onSubmit()
 

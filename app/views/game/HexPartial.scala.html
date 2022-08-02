@@ -8,32 +8,33 @@ def getVectors(width: Double): (Double, Double) = {
 (width * 0.5, width * 0.875)
 }
 
-val pixels = 2.5
-val blur = 0.5
+val pixels = 0.28
+val blur = 1
 val (right, down) = getVectors(pixels)
 
 val bCss = Map(
     //      right     down   blur   color
-    1 -> s"-${pixels}px 0px ${blur}px #000",
-    2 -> s"-${right}px -${down}px ${blur}px #000",
-    3 -> s"${right}px -${down}px ${blur}px #000",
-    4 -> s"${pixels}px 0px ${blur}px #000",
-    5 -> s"${right}px ${down}px ${blur}px #000",
-    6 -> s"-${right}px ${down}px ${blur}px #000"
+    1 -> s"-${pixels}vw 0px ${blur}px #000",
+    2 -> s"-${right}vw -${down}px ${blur}px #000",
+    3 -> s"${right}vw -${down}px ${blur}px #000",
+    4 -> s"${pixels}vw 0px ${blur}px #000",
+    5 -> s"${right}vw ${down}px ${blur}px #000",
+    6 -> s"-${right}vw ${down}px ${blur}px #000"
 )
     val cCss = Map(
     //       right     down   blur   color
-    1 -> s"-${pixels}px 0px ${blur}px $color",
-    2 -> s"-${right}px -${down}px ${blur}px $color",
-    3 -> s"${right}px -${down}px ${blur}px $color",
-    4 -> s"${pixels}px 0px ${blur}px $color",
-    5 -> s"${right}px ${down}px ${blur}px $color",
-    6 -> s"-${right}px ${down}px ${blur}px $color"
+    1 -> s"-${pixels}vw 0px ${blur}px $color",
+    2 -> s"-${right}vw -${down}px ${blur}px $color",
+    3 -> s"${right}vw -${down}px ${blur}px $color",
+    4 -> s"${pixels}vw 0px ${blur}px $color",
+    5 -> s"${right}vw ${down}px ${blur}px $color",
+    6 -> s"-${right}vw ${down}px ${blur}px $color"
     )
 
     val notBorders = Seq(1, 2, 3, 4, 5, 6).filterNot(borders.contains)
 
-    (notBorders.map(cCss) ++ borders.map(bCss)).mkString("text-shadow: ", ", ", "")
+    (notBorders.map(cCss) ++ borders.map(bCss)).map("drop-shadow(" + _ + ")").mkString("filter: ", " ", "")
+""
 }
 
 @getColor(player: Int) = @{
@@ -113,11 +114,11 @@ val bCss = Map(
         }
 
         @game.boardState.map{ territory =>
-            <span class="@territoryClasses(game.thisTurn, territory)" style="color: @{getColor(territory.player)}" onclick="@territoryClassesOnClick(game.thisTurn, territory)">
+            <span class="@territoryClasses(game.thisTurn, territory)" style="--hex-color: @{getColor(territory.player)}" onclick="@territoryClassesOnClick(game.thisTurn, territory)">
                 <div style="top:@{territory.topPx}vw;left:@{territory.leftPx}vw;position: absolute;z-index:100;font-size:3vw;padding-left:1vw;color: black;background-color:white;" >@territory.diceCount</div>
                 @territory.hexes.map{ hex: Hex =>
-                    <div class="borderChild" style="top:@{hex.topPx}vw;left:@{hex.leftPx}vw;@stroke(hex.needsBorder(territory.hexes), getColor(territory.player));">
-                        &#x2B22;
+                    <div class="borderChild" style="top:@{hex.topPx}vw;left:@{hex.leftPx}vw;">
+                        @Hexagon(hex.needsBorder(territory.hexes))
                     </div>
                 }
             </span>
