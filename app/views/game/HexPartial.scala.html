@@ -115,7 +115,7 @@ val bCss = Map(
 
         @game.boardState.map{ territory =>
             <span class="@territoryClasses(game.thisTurn, territory)" style="--hex-color: @{getColor(territory.player)}" onclick="@territoryClassesOnClick(game.thisTurn, territory)">
-<!--                <div style="top:@{territory.topPx}vw;left:@{territory.leftPx}vw;position: absolute;z-index:100;font-size:3vw;padding-left:1vw;color: black;background-color:white;" >@territory.diceCount</div>-->
+                <div style="top:@{territory.topPx}vw;left:@{territory.leftPx}vw;position: absolute;z-index:100;font-size:3vw;padding-left:1vw;color: black;background-color:white;" >@territory.diceCount</div>
                 @territory.hexes.map{ hex: Hex =>
                     <div class="borderChild" style="top:@{hex.topPx}vw;left:@{hex.leftPx}vw;">
                         @Hexagon(hex.needsBorder(territory.hexes))

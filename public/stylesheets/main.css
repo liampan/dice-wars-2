@@ -86,60 +86,60 @@ background-image: url("data:image/svg+xml,%3Csvg width='32' height='64' viewBox=
 
 .hex-top {
     width: 0vw;
-    border-bottom: 0.4vw solid var(--hex-color);
-    border-left: 0.7vw solid transparent;
-    border-right: 0.7vw solid transparent;
+    border-bottom: 0.48vw solid var(--hex-color);
+    border-left: 0.84vw solid transparent;
+    border-right: 0.84vw solid transparent;
 }
 
 .hex-middle {
-    width: 1.4vw;
-    height: 0.8vw;
+    width: 1.68vw;
+    height: 0.9vw;
     background-color: var(--hex-color);
 }
 
 .hex-bottom {
     width: 0vw;
-    border-top: 0.4vw solid var(--hex-color);
-    border-left: 0.7vw solid transparent;
-    border-right: 0.7vw solid transparent;
+    border-top: 0.48vw solid var(--hex-color);
+    border-left: 0.84vw solid transparent;
+    border-right: 0.84vw solid transparent;
 }
 
 .hex-border {
     position: absolute;
-    height: 0.7vw;
-    border-left: 0.4vw solid var(--hex-color);
-    border-top: 0.25vw solid transparent;
-    border-bottom: 0.25vw solid transparent;
-    transform:translate(0.02vw, 0.15vw) rotate(180deg);
+    height: 0.76vw;
+    border-left: 0.3vw solid var(--hex-color);
+    border-top: 0.23vw solid transparent;
+    border-bottom: 0.23vw solid transparent;
+    transform: translate(-0vw, 0.27vw) rotate(180deg);
 }
 
 .hex-border-1 {
-    transform-origin: 0.75vw 0.75vw;
+    transform-origin: 0.86vw 0.86vw;
     transform: rotate(0deg);
 }
 
 .hex-border-2 {
-    transform-origin: 0.75vw 0.75vw;
+    transform-origin: 0.86vw 0.86vw;
     transform: rotate(60deg);
 }
 
 .hex-border-3 {
-    transform-origin: 0.75vw 0.75vw;
+    transform-origin: 0.86vw 0.86vw;
     transform: rotate(120deg);
 }
 
 .hex-border-4 {
-    transform-origin: 0.75vw 0.75vw;
+    transform-origin: 0.86vw 0.86vw;
     transform: rotate(180deg);
 }
 
 .hex-border-5 {
-    transform-origin: 0.75vw 0.75vw;
+    transform-origin: 0.86vw 0.86vw;
     transform: rotate(240deg);
 }
 
 .hex-border-6 {
-    transform-origin: 0.75vw 0.75vw;
+    transform-origin: 0.86vw 0.86vw;
     transform: rotate(300deg);
 }
 

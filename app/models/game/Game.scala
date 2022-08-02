@@ -11,8 +11,8 @@ case class Settings(
                    minTerritorySize: Int, // no smaller than 5 really
                    maxTerritorySize: Int //probs max 100/ the bigger the difference the more complete the map is
                    ){
-  final val numberOfRows: Int = 23
-  final val numberOfColumns: Int = 30
+  final val numberOfRows: Int = 29 //23
+  final val numberOfColumns: Int = 35 // 30
 }
 
 trait Player {
