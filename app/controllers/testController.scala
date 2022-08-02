@@ -18,9 +18,10 @@ class testController @Inject()(testView: Test,
   def test() = Action {
     val settings = Settings(8, 10, 50)
 
-    val game = Game(Settings(1, 1, 1), boardState = Set(Territory(Set(Hex(1, 1), Hex(2, 2), Hex(2, 1)), 1, 1)), Seq(Human("pan", "pan", 1)))
+    //val game = Game(Settings(1, 1, 1), boardState = Set(Territory(Set((1,0), (0,1), (0,2), (1,2), (2,2), (2,1)).map(Hex.tupled), 1, 1)), Seq(Human("pan", "pan", 1)))
+    //val game = Game(Settings(1, 1, 1), boardState = Set(Territory(Set((1,0), (1, 1)).map(Hex.tupled), 1, 1)), Seq(Human("pan", "pan", 1)))
 
-    //val game = boardGenerator.create(settings, Seq(Human("pan", "pan", 1)))
+    val game = boardGenerator.create(settings, Seq(Human("pan", "pan", 1)))
 
     Ok(testView(HexPartial(game, "blah", false)))
   }
