@@ -16,7 +16,7 @@ class testController @Inject()(testView: Test,
                               )(implicit system: ActorSystem, mat: Materializer) extends AbstractController(cc) {
 
   def test() = Action {
-    val settings = Settings(1, 10, 50)
+    val settings = Settings(4, 10, 50)
 
     //val game = Game(Settings(1, 1, 1), boardState = Set(Territory(Set((1,0), (0,1), (0,2), (1,2), (2,2), (2,1)).map(Hex.tupled), 1, 1)), Seq(Human("pan", "pan", 1)))
     //val game = Game(Settings(1, 1, 1), boardState = Set(Territory(Set((1,0), (1, 1)).map(Hex.tupled), 1, 1)), Seq(Human("pan", "pan", 1)))

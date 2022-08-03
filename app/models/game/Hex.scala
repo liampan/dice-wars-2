@@ -10,7 +10,7 @@ package models.game
 
 final case class Hex(row: Int, column: Int) {
 
-  def topPx = ((row * 22)/16.5) + 0.5
+  def topPx = ((row * 21)/16.5) + 1
   def leftPx = (column * 26 + (if (evenRow) 0 else 13))/16.5
 
   private def evenRow: Boolean = row % 2 == 0

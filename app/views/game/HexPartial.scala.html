@@ -115,7 +115,7 @@ val bCss = Map(
             }
         }
 
-        @game.boardState.map{ territory =>
+        @game.boardState.toSeq.sortBy(a => (a.topPx)*10 + a.leftPx).map{ territory =>
             <span class="@territoryClasses(game.thisTurn, territory)" style="--hex-color: @{getColor(territory.player)}" onclick="@territoryClassesOnClick(game.thisTurn, territory)">
                 @Dice(territory)
                  @territory.hexes.map{ hex: Hex =>
