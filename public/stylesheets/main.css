@@ -85,7 +85,7 @@ background-image: url("data:image/svg+xml,%3Csvg width='32' height='64' viewBox=
 }
 
 hex {
-    height:0.98vw;
+    height:1.053vw;
     width:0.79vw;
     position: absolute;
     transform-origin: center right
@@ -93,18 +93,18 @@ hex {
 
 .triangle-edge {
     position: absolute;
-    height: 0.62vw;
+    height: 0.79vw;
     border-left: 0.1vw solid black;
-    border-top: 0.2vw solid transparent;
-    border-bottom: 0.2vw solid transparent;
+    border-top: 0.1vw solid transparent;
+    border-bottom: 0.1vw solid transparent;
 }
 
 .triangle {
     position: absolute;
     height: 0vw;
     border-left: 0.79vw solid var(--hex-color);
-    border-top: 0.49vw solid transparent;
-    border-bottom: 0.49vw solid transparent;
+    border-top: 0.526vw solid transparent;
+    border-bottom: 0.526vw solid transparent;
 }
 
 
