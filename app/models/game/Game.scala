@@ -26,7 +26,7 @@ case class Human(userId: String, userName: String, number: Int, clickedTerritory
 }
 
 //basic Ai attacks once per go.
-case class AI(number: Int) extends Player {
+case class AI(number: Int, goCount: Int = 0) extends Player {
   override val userName: String = "\uD835\uDE08\uD835\uDE10" // AI
   override val clickedTerritoryId: Option[String] = None
   override val userId: String = "AI_" + UUID.randomUUID().toString.takeRight(5)
@@ -34,19 +34,28 @@ case class AI(number: Int) extends Player {
 
   //todo how does AI play?
   def playTurn(game: Game): Game = {
-    Thread.sleep(700)
+    Thread.sleep(200)
+      if (goCount > 2)
+        game
+          .copy(players = game.players.updated(game.players.indexOf(this), copy(goCount = 0)))
+          .endTurn
+      else
+        attack(game)
+  }
+
+  def attack(game: Game): Game =
     game
       .boardState
-      .find(t => t.player == number && t.diceCount > 1)
+      .filter(t => t.player == number && t.diceCount > 1 && t.attackable(game.boardState).nonEmpty)
+      .maxByOption(_.diceCount)
       .flatMap(ownTerritory =>
-        ownTerritory.attackable(game.boardState.toSet)
-        .headOption
-        .map(attackble =>
-          game.attack(ownTerritory.id, attackble.id)
-      ))
+        ownTerritory.attackable(game.boardState)
+          .minByOption(_.diceCount)
+          .map(attackble =>
+            game.attack(ownTerritory.id, attackble.id)
+          ))
       .getOrElse(game)
-      .endTurn
-  }
+      .copy(players = game.players.updated(game.players.indexOf(this), copy(goCount = goCount + 1)))
 }
 
 case class Attack(attacker: Territory, defender: Territory, attackDice: Seq[Int], defendDice: Seq[Int]){
