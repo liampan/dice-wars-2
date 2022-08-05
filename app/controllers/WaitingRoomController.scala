@@ -6,7 +6,9 @@ import akka.stream.Materializer
 import com.google.inject.Inject
 import controllers.GameController.{roomKey, userIdKey, usernameKey}
 import controllers.WaitingRoomController.form
-import models.game.{AI, Human, Player, Settings}
+import models.game.Settings
+import models.game.players.{Human, Player}
+import models.game.players.ai.{AI, BasicAI}
 import play.api.data.{Form, Forms}
 import play.api.data.Forms.{mapping, nonEmptyText}
 import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
@@ -45,7 +47,7 @@ class WaitingRoomController @Inject()(waitingRoomView: WaitingRoomView,
               .toSeq
               .zipWithIndex
               .find(_._2+1 == playerNumber)
-              .fold[Player](AI(playerNumber))(player => Human(player._1.userId, player._1.userName, playerNumber))
+              .fold[Player](AI.getAI(playerNumber))(player => Human(player._1.userId, player._1.userName, playerNumber))
           }.take(16)
 
           val game = boardGenerator.create(settings, players)

@@ -4,7 +4,8 @@ import actions.UserAction
 import akka.actor.ActorSystem
 import akka.stream.Materializer
 import com.google.inject.Inject
-import models.game.{Game, Hex, Human, Settings, Territory}
+import models.game.players.Human
+import models.game.{Game, Hex, Settings, Territory}
 import play.api.mvc.{AbstractController, ControllerComponents}
 import services.game.BoardGenerator
 import views.html.game.{GameScreenView, HexPartial}

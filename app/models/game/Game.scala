@@ -1,6 +1,8 @@
 package models.game
 
-import java.util.UUID
+import models.game.players.ai.AI
+import models.game.players.{Human, Player}
+
 import scala.annotation.tailrec
 import scala.util.Random
 
@@ -11,51 +13,6 @@ case class Settings(
                    ){
   final val numberOfRows: Int = 30 //23
   final val numberOfColumns: Int = 35 // 30
-}
-
-trait Player {
-  val userId: String
-  val userName: String
-  val number: Int
-  val clickedTerritoryId: Option[String]
-  def noClick: Player
-}
-
-case class Human(userId: String, userName: String, number: Int, clickedTerritoryId: Option[String] = None) extends Player{
-  override def noClick: Player = this.copy(clickedTerritoryId = None)
-}
-
-//basic Ai attacks once per go.
-case class AI(number: Int, goCount: Int = 0) extends Player {
-  override val userName: String = "\uD835\uDE08\uD835\uDE10" // AI
-  override val clickedTerritoryId: Option[String] = None
-  override val userId: String = "AI_" + UUID.randomUUID().toString.takeRight(5)
-  override def noClick: Player = this
-
-  //todo how does AI play?
-  def playTurn(game: Game): Game = {
-    Thread.sleep(200)
-      if (goCount > 2)
-        game
-          .copy(players = game.players.updated(game.players.indexOf(this), copy(goCount = 0)))
-          .endTurn
-      else
-        attack(game)
-  }
-
-  def attack(game: Game): Game =
-    game
-      .boardState
-      .filter(t => t.player == number && t.diceCount > 1 && t.attackable(game.boardState).nonEmpty)
-      .maxByOption(_.diceCount)
-      .flatMap(ownTerritory =>
-        ownTerritory.attackable(game.boardState)
-          .minByOption(_.diceCount)
-          .map(attackble =>
-            game.attack(ownTerritory.id, attackble.id)
-          ))
-      .getOrElse(game)
-      .copy(players = game.players.updated(game.players.indexOf(this), copy(goCount = goCount + 1)))
 }
 
 case class Attack(attacker: Territory, defender: Territory, attackDice: Seq[Int], defendDice: Seq[Int]){
@@ -148,8 +105,10 @@ case class Game(settings: Settings, boardState: Set[Territory], players: Seq[Pla
   def thisTurnIsOut = !playerIsStillInPlay(thisTurn)
 
 
-  def playThisAITurn =
+  def playThisAITurn = {
+    Thread.sleep(200)
     thisTurn.asInstanceOf[AI].playTurn(this)
+  }
 
   def endTurn: Game = {
     val dice: Int = largestUnitedTerritorySize(thisTurn)

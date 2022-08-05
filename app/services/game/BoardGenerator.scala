@@ -1,7 +1,8 @@
 package services.game
 
 import com.google.inject.Inject
-import models.game.{Game, Hex, Player, Settings, Territory}
+import models.game.players.Player
+import models.game.{Game, Hex, Settings, Territory}
 import services.game.BoardGenerator.splitDice
 
 import scala.annotation.tailrec

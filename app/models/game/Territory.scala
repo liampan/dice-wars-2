@@ -1,5 +1,7 @@
 package models.game
 
+import models.game.players.Player
+
 import java.util.UUID
 import scala.util.{Random, Try}
 
