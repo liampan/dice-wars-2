@@ -10,6 +10,7 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 import services.game.BoardGenerator
 import views.html.game.{GameScreenView, HexPartial}
 import views.html.Test
+import views.html.game.Hexagon2
 
 class testController @Inject()(testView: Test,
                                cc: ControllerComponents,
@@ -18,6 +19,7 @@ class testController @Inject()(testView: Test,
 
   def test() = Action {
     val settings = Settings(4, 10, 50)
+
 
     //val game = Game(Settings(1, 1, 1), boardState = Set(Territory(Set((1,0), (0,1), (0,2), (1,2), (2,2), (2,1)).map(Hex.tupled), 1, 1)), Seq(Human("pan", "pan", 1)))
     //val game = Game(Settings(1, 1, 1), boardState = Set(Territory(Set((1,0), (1, 1)).map(Hex.tupled), 1, 1)), Seq(Human("pan", "pan", 1)))
