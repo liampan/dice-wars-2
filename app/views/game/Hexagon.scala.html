@@ -1,0 +1,8 @@
+
+@(borders: Seq[Int])
+
+<div style="transform: rotate(30deg);">
+@Seq(1,2,3,4,5,6).map{ i =>
+    <div class=@if(borders.contains(i)){"hex-tri hex-bord"}else{"hex-tri"} style="transform: rotate(@{(i) * 60}deg);"></div>
+}
+</div>
