@@ -10,7 +10,6 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 import services.game.BoardGenerator
 import views.html.game.{GameScreenView, HexPartial}
 import views.html.Test
-import views.html.game.Hexagon2
 
 class testController @Inject()(testView: Test,
                                cc: ControllerComponents,
